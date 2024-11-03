@@ -1,0 +1,106 @@
+﻿<Window x:Class="Pulsar.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Pulsar"
+        mc:Ignorable="d"
+        Title="Pulsar" Height="450" Width="800" MinHeight="450" MinWidth="800" MaxHeight="450" MaxWidth="800"
+        Background="#000000" Icon="/Pulsar.png">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="3*"/>
+        </Grid.RowDefinitions>
+        <Image Name="Preview" Source="/preview.png" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Center" Grid.Column="1" Height="165" Grid.RowSpan="2" Margin="10"/>
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid Margin="10" Background="#760000">
+                    <TextBlock Name="Mod1" Foreground="#5f0000" HorizontalAlignment="Center" Text="Mods" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="2,2,0,0"/>
+                    <TextBlock Name="Mod2" Foreground="#ffd9da" HorizontalAlignment="Center" Text="Mods" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="0,0,2,2"/>
+                </Grid>
+                <Grid Margin="10" Background="#01a137" Grid.Column="1">
+                    <TextBlock Name="Assign1" Foreground="#006210" HorizontalAlignment="Center" Text="Assign" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="2,2,0,0"/>
+                    <TextBlock Name="Assign2" Foreground="#c3e7c1" HorizontalAlignment="Center" Text="Assign" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="0,0,2,2"/>
+                </Grid>
+                <Grid Margin="10" Background="#006de8" Grid.Column="2">
+                    <TextBlock Name="Settings1" Foreground="#003f92" HorizontalAlignment="Center" Text="Settings" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="2,2,0,0"/>
+                    <TextBlock Name="Settings2" Foreground="#e8feff" HorizontalAlignment="Center" Text="Settings" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="0,0,2,2"/>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Foreground="#e8feff" HorizontalAlignment="Center" Text="Sort by..." VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold"/>
+                <ComboBox Margin="10,3,10,3" Name="Sort" Grid.Row="0" Grid.Column="1">
+                </ComboBox>
+                <TextBox Margin="10,3,10,3" Name="Search" Grid.Row="0" Grid.Column="2" Text="Search..."/>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,80,10,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="5*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <TextBox Grid.ColumnSpan="2" Background="#e43079" Foreground="#ffcacd" Name="DescBox" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Quasar never worked for me, so I made my own. You're seeing this because this mod has no description, or no mod is selected."/>
+            <Grid Margin="10,3,10,3" Background="#f29800" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Foreground="#a06500" HorizontalAlignment="Center" Text="Download" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="2,2,0,0"/>
+                <TextBlock Foreground="#fff1d1" HorizontalAlignment="Center" Text="Download" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="0,0,2,2"/>
+            </Grid>
+            <TextBlock Foreground="#e8feff" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" Text="Find More" VerticalAlignment="Center" FontSize="25" FontWeight="SemiBold"/>
+        </Grid>
+        <DataGrid Name="ModDataGrid"  Grid.Column="0" Grid.Row="1" Margin="10" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False"
+                  RowBackground="Red" AlternatingRowBackground="DarkRed" AutoGenerateColumns="False" SelectionChanged="currentrow">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Header="On" Binding="{Binding onoff, Mode=TwoWay}" IsReadOnly="False" Width="*"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True" Width="4*"/>
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" IsReadOnly="True" Width="2*"/>
+                <DataGridTextColumn Header="Category" Binding="{Binding Cat}" IsReadOnly="True" Width="2*"/>
+                <DataGridTextColumn Header="Version" Binding="{Binding Version}" IsReadOnly="True" Width="2*"/>
+                <DataGridTextColumn Header="Link" Binding="{Binding Link}" IsReadOnly="True" Width="*"/>
+            </DataGrid.Columns>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="New Mod"
+                              Click="New_OnClick"
+                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}"/>
+                    <MenuItem Header="Edit Metadata"
+                              Click="Edit_OnClick"
+                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
+                    <MenuItem Header="Open Folder"
+                              Click="Folder_OnClick"
+                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
+                    <MenuItem Header="Properties"
+                              Click="Assign_OnClick"
+                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
+                    <MenuItem Header="Zip Mod"
+                              Click="Zip_OnClick"
+                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
+                    <MenuItem Header="Delete"
+                              Click="Delete_OnClick"
+                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
+    </Grid>
+</Window>
