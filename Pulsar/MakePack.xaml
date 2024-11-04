@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pulsar"
         mc:Ignorable="d"
-        Title="Create Mod" Height="330" Width="300" MaxHeight="330" MaxWidth="300" MinHeight="330" MinWidth="300" Background="#e43079">
+        Title="Create Mod" Height="330" Width="300" MinHeight="330" MinWidth="300" Background="#e43079">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>

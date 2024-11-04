@@ -28,7 +28,7 @@ namespace Pulsar
         private void Open_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openPng = new OpenFileDialog();
-            openPng.Filter = "|Preview Image (*.*)|*.*";
+            openPng.Filter = "Preview Image (*.*)|*.*";
             openPng.Title = "Select Preview";
             if (openPng.ShowDialog() == true)
             {
