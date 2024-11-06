@@ -19,7 +19,7 @@
         <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -75,14 +75,19 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="4.5*"/>
                 <RowDefinition Height="0.5*"/>
-                <RowDefinition Height="5*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="4.5*"/>
+                <RowDefinition Height="1.5*"/>
             </Grid.RowDefinitions>
             <Image Name="Preview" Source="/Images/preview.png" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Center" Height="Auto" Grid.ColumnSpan="2"/>
             <TextBox Grid.ColumnSpan="2" Grid.Row="2" Name="DescBox" FontSize="15" Background="#1d1d1d" Foreground="#ffffff" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Quasar never worked for me, so I made my own. You're seeing this because this mod has no description, or no mod is selected."/>
-            <Grid Margin="10,3,10,3" Background="#f29800" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Foreground="#a06500" HorizontalAlignment="Center" Text="Download" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="2,2,0,0"/>
-                <TextBlock Foreground="#fff1d1" HorizontalAlignment="Center" Text="Download" VerticalAlignment="Center" FontSize="25" FontWeight="Black" Margin="0,0,2,2"/>
+            <Grid Grid.Column="1" Grid.Row="3">
+                <Button Name="DownloadButton" Margin="5" Click="Download_Click">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Image Name="DownloadImage" Source="/DownloadUnsel.png"/>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </Grid>
             <TextBlock Foreground="#e8feff" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" Text="Find More" VerticalAlignment="Center" FontSize="25" FontWeight="SemiBold"/>
         </Grid>

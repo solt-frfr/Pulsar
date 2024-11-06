@@ -146,5 +146,12 @@
     <Resource Include="Images\SettingsSel.png" />
     <Resource Include="Images\SettingsUnsel.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\DownloadSel.png" />
+    <Resource Include="Images\DownloadUnsel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="DownloadUnsel.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

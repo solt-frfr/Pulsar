@@ -28,13 +28,12 @@ namespace Pulsar
         public MainWindow()
         {
             InitializeComponent();
-            var jsonoptions = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
+            UpdateLog();
+        }
+        public void UpdateLog()
+        {
             ConsoleBox.Text = File.ReadAllText($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\log.json");
         }
-        
         private void New_OnClick(object sender, RoutedEventArgs e)
         {
             MakePack newpack = new MakePack();
@@ -88,6 +87,11 @@ namespace Pulsar
             {
                 settingsImage.Source = new BitmapImage(new Uri("/Images/SettingsUnsel.png", UriKind.Relative));
             }
+            var downloadImage = (Image)DownloadButton.Template.FindName("DownloadImage", DownloadButton);
+            if (downloadImage != null)
+            {
+                downloadImage.Source = new BitmapImage(new Uri("/Images/DownloadUnsel.png", UriKind.Relative));
+            }
             Mods.Visibility = Visibility.Visible;
             SearchSort.Visibility = Visibility.Visible;
             ModContent.Visibility = Visibility.Visible;
@@ -109,6 +113,11 @@ namespace Pulsar
             {
                 settingsImage.Source = new BitmapImage(new Uri("/Images/SettingsUnsel.png", UriKind.Relative));
             }
+            var downloadImage = (Image)DownloadButton.Template.FindName("DownloadImage", DownloadButton);
+            if (downloadImage != null)
+            {
+                downloadImage.Source = new BitmapImage(new Uri("/Images/DownloadUnsel.png", UriKind.Relative));
+            }
             Mods.Visibility = Visibility.Collapsed;
             SearchSort.Visibility = Visibility.Collapsed;
             ModContent.Visibility = Visibility.Collapsed;
@@ -129,6 +138,38 @@ namespace Pulsar
             if (settingsImage != null)
             {
                 settingsImage.Source = new BitmapImage(new Uri("/Images/SettingsSel.png", UriKind.Relative));
+            }
+            var downloadImage = (Image)DownloadButton.Template.FindName("DownloadImage", DownloadButton);
+            if (downloadImage != null)
+            {
+                downloadImage.Source = new BitmapImage(new Uri("/Images/DownloadUnsel.png", UriKind.Relative));
+            }
+            Mods.Visibility = Visibility.Collapsed;
+            SearchSort.Visibility = Visibility.Collapsed;
+            ModContent.Visibility = Visibility.Collapsed;
+        }
+
+        private void Download_Click(object sender, RoutedEventArgs e)
+        {
+            var modsImage = (Image)ModsButton.Template.FindName("ModsImage", ModsButton);
+            if (modsImage != null)
+            {
+                modsImage.Source = new BitmapImage(new Uri("/Images/ModsUnsel.png", UriKind.Relative));
+            }
+            var assignImage = (Image)AssignButton.Template.FindName("AssignImage", AssignButton);
+            if (assignImage != null)
+            {
+                assignImage.Source = new BitmapImage(new Uri("/Images/AssignUnsel.png", UriKind.Relative));
+            }
+            var settingsImage = (Image)SettingsButton.Template.FindName("SettingsImage", SettingsButton);
+            if (settingsImage != null)
+            {
+                settingsImage.Source = new BitmapImage(new Uri("/Images/SettingsUnsel.png", UriKind.Relative));
+            }
+            var downloadImage = (Image)DownloadButton.Template.FindName("DownloadImage", DownloadButton);
+            if (downloadImage != null)
+            {
+                downloadImage.Source = new BitmapImage(new Uri("/Images/DownloadSel.png", UriKind.Relative));
             }
             Mods.Visibility = Visibility.Collapsed;
             SearchSort.Visibility = Visibility.Collapsed;

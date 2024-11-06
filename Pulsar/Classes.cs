@@ -35,6 +35,12 @@ namespace Pulsar
             string jsonString = JsonSerializer.Serialize(kms, jsonoptions);
             string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\log.json";
             File.WriteAllText(filepath, jsonString);
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.UpdateLog();
+            }
+
         }
     }
 }
