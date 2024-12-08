@@ -15,4 +15,4 @@
 
 # Credits
 ## [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager)
- Aemulus' Parallel Logging feature was used.
+ Aemulus' Parallel Logging feature was used, and is a huge inspiration for this project.
