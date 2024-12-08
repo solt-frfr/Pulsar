@@ -38,7 +38,6 @@ namespace Pulsar
             var mainWindow = Application.Current.MainWindow as MainWindow;
             if (mainWindow != null)
             {
-                mainWindow.UpdateLog();
             }
 
         }

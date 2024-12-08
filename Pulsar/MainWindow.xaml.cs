@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -16,7 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using AemulusModManager;
 
 namespace Pulsar
 {
@@ -25,14 +26,31 @@ namespace Pulsar
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private StreamWriter sw;
+        private TextBoxOutputter outputter;
+
+        public MainWindow(bool running, bool oneClick)
         {
             InitializeComponent();
-            UpdateLog();
+            sw = new StreamWriter(
+                new FileStream(
+                    $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Pulsar.log",
+                    FileMode.Append,
+                    FileAccess.Write,
+                    FileShare.ReadWrite // Allow other processes to read/write
+                ),
+                Encoding.UTF8
+            );
+
+            outputter = new TextBoxOutputter(sw);
+            Directory.CreateDirectory($@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods");
+            outputter.WriteEvent += consoleWriter_WriteEvent;
+            outputter.WriteLineEvent += consoleWriter_WriteLineEvent;
+            Console.SetOut(outputter);
         }
-        public void UpdateLog()
+        private void ScrollToBottom(object sender, TextChangedEventArgs args)
         {
-            ConsoleBox.Text = File.ReadAllText($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\log.json");
+            ConsoleOutput.ScrollToEnd();
         }
         private void New_OnClick(object sender, RoutedEventArgs e)
         {
@@ -47,7 +65,7 @@ namespace Pulsar
 
         private void Folder_OnClick(object sender, RoutedEventArgs e)
         {
-            Process.Start($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}");
+            Process.Start($@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}");
         }
 
         private void Assign_OnClick(object sender, RoutedEventArgs e)
@@ -174,6 +192,30 @@ namespace Pulsar
             Mods.Visibility = Visibility.Collapsed;
             SearchSort.Visibility = Visibility.Collapsed;
             ModContent.Visibility = Visibility.Collapsed;
+            AemulusModManager.Utilities.ParallelLogger.Log("[DEBUG] This is a log attempt. Did it work?");
+            AemulusModManager.Utilities.ParallelLogger.Log("[ERROR] This is an error attempt. Did it work?");
+            AemulusModManager.Utilities.ParallelLogger.Log("[INFO] This is an info attempt. Did it work?");
+        }
+        void consoleWriter_WriteLineEvent(object sender, ConsoleWriterEventArgs e)
+        {
+            Console.Write(e.Value + "\n");
+        }
+
+        void consoleWriter_WriteEvent(object sender, ConsoleWriterEventArgs e)
+        {
+            string text = (string)e.Value;
+            this.Dispatcher.Invoke(() =>
+            {
+                if (text.Contains("[INFO]"))
+                    ConsoleOutput.AppendText(text, "#52FF00");
+                else if (text.Contains("[WARNING]"))
+                    ConsoleOutput.AppendText(text, "#FFFF00");
+                else if (text.Contains("[ERROR]"))
+                    ConsoleOutput.AppendText(text, "#FFB0B0");
+                else
+                    ConsoleOutput.AppendText(text, "#F2F2F2");
+
+            });
         }
     }
 }
