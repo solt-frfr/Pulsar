@@ -11,7 +11,7 @@
 
  ~~Assign~~
 
- ~~Settings~~
+ Settings
 
  ~~Download~~
 
@@ -21,8 +21,11 @@
 
 ### Built-in Logging and Console.
 
-### Dummy Package Builder.
+### Functioning Package Builder.
 
 # Credits
 ## [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager)
  Aemulus' Parallel Logging feature was used, and is a huge inspiration for this project.
+
+## [Quasar](https://github.com/Mowjoh/Quasar)
+ Quasar, the origianl SSBU mod manager. I looked at their code to find what the assign menu exactly did.
