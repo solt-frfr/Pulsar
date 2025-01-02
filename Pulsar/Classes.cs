@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Pulsar
 {
-    internal class Meta
+    public class Meta
     {
         public string Name { get; set; }
         public string Description { get; set; }

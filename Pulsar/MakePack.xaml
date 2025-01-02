@@ -24,18 +24,18 @@
         </Grid.RowDefinitions>
         <TextBlock Text="Name" Foreground="#ffd9da" Grid.Row="0" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBlock Text="Version" Foreground="#ffd9da" Grid.Row="2" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBlock Text="Type" Foreground="#ffd9da" Grid.Row="3" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBlock Text="Category" Foreground="#ffd9da" Grid.Row="4" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBlock Text="Link" Foreground="#ffd9da" Grid.Row="5" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBlock Text="ID" Foreground="#ffd9da" Grid.Row="6" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Text="Type" ToolTip="''Subcategory'' on Gamebanana." Foreground="#ffd9da" Grid.Row="3" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Text="Category" ToolTip="''Supercategory'' on Gamebanana." Foreground="#ffd9da" Grid.Row="4" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Text="Link" ToolTip="Gamebanana or other source link. Gamebanana links allow updates to happen automatically." Foreground="#ffd9da" Grid.Row="5" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Text="ID" ToolTip="Helps to differenciate mods that happen to have the same name. Will be used as the folder name."  Foreground="#ffd9da" Grid.Row="6" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBlock Text="Preview" Foreground="#ffd9da" Grid.Row="7" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBox Name="NameBox" Margin="5" Grid.Column="1" Grid.Row="0" Foreground="#ffd9da" Background="#a10943"/>
+        <TextBox Name="NameBox" TextChanged="NameChanged" Margin="5" Grid.Column="1" Grid.Row="0" Foreground="#ffd9da" Background="#a10943"/>
         <TextBox Name="DescBox" Margin="5" Grid.Column="1" Grid.Row="1" Foreground="#ffd9da" Background="#a10943"/>
         <TextBox Name="VersionBox" Margin="5" Grid.Column="1" Grid.Row="2" Foreground="#ffd9da" Background="#a10943"/>
-        <TextBox Name="TypeBox" Margin="5" Grid.Column="1" Grid.Row="3" Foreground="#ffd9da" Background="#a10943"/>
-        <TextBox Name="CatBox" Margin="5" Grid.Column="1" Grid.Row="4" Foreground="#ffd9da" Background="#a10943"/>
-        <TextBox Name="LinkBox" Margin="5" Grid.Column="1" Grid.Row="5" Foreground="#ffd9da" Background="#a10943"/>
-        <TextBox Name="IDBox" Margin="5" Grid.Column="1" Grid.Row="6" Foreground="#ffd9da" Background="#a10943"/>
+        <TextBox Name="TypeBox" ToolTip="''Subcategory'' on Gamebanana." Margin="5" Grid.Column="1" Grid.Row="3" Foreground="#ffd9da" Background="#a10943"/>
+        <TextBox Name="CatBox" ToolTip="''Supercategory'' on Gamebanana." Margin="5" Grid.Column="1" Grid.Row="4" Foreground="#ffd9da" Background="#a10943"/>
+        <TextBox Name="LinkBox" ToolTip="Gamebanana or other source link. Gamebanana links allow updates to happen automatically." Margin="5" Grid.Column="1" Grid.Row="5" Foreground="#ffd9da" Background="#a10943"/>
+        <TextBox Name="IDBox" TextChanged="IDChanged" KeyDown="IDBox_KeyDown" ToolTip="Helps to differenciate mods that happen to have the same name. Will be used as the folder name." Margin="5" Grid.Column="1" Grid.Row="6" Foreground="#ffd9da" Background="#a10943"/>
         <Grid Grid.Row="7" Grid.Column="1" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>

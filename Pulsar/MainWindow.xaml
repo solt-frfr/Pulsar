@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pulsar"
         mc:Ignorable="d"
-        Title="Pulsar" Height="450" Width="800" MinHeight="450" MinWidth="800" 
+        Title="Pulsar" Height="500" Width="800" MinHeight="500" MinWidth="800" 
         Background="#000000" Icon="/Pulsar.png">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
@@ -15,6 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="3*"/>
+            <RowDefinition Height=".5*"/>
         </Grid.RowDefinitions>
         <Grid Margin="10">
             <Grid.RowDefinitions>
@@ -55,8 +56,9 @@
                     </Button>
                 </Grid>
             </Grid>
-            <Grid Name="SearchSort" Grid.Row="1">
+            <Grid Name="SearchSort" Grid.Row="1" Visibility="Collapsed">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -67,7 +69,7 @@
                 <TextBox Margin="10,3,10,3" Name="Search" Grid.Row="0" Grid.Column="2" Text="Search..."/>
             </Grid>
         </Grid>
-        <Grid Grid.RowSpan="2" Grid.Column="1" Name="ModContent" Visibility="Visible" Margin="10,10,10,0">
+        <Grid Grid.RowSpan="2" Grid.Column="1" Name="ModContent" Visibility="Collapsed" Margin="10,10,10,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -79,38 +81,25 @@
                 <RowDefinition Height="1.5*"/>
             </Grid.RowDefinitions>
             <Image Name="Preview" Source="/Images/preview.png" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Center" Height="Auto" Grid.ColumnSpan="2"/>
-            <TextBox Grid.ColumnSpan="2" Grid.Row="2" Name="DescBox" FontSize="12" Background="#1d1d1d" Foreground="#ffffff" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Quasar never worked for me, so I made my own. You're seeing this because this mod has no description, or no mod is selected."/>
-            <Grid Grid.Column="1" Grid.Row="3">
-                <Button Name="DownloadButton" Margin="5" Click="Download_Click">
-                    <Button.Template>
-                        <ControlTemplate>
-                            <Image Name="DownloadImage" Source="/DownloadUnsel.png"/>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-            </Grid>
-            <TextBlock Foreground="#e8feff" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" Text="Find More" VerticalAlignment="Center" FontSize="25" FontWeight="SemiBold"/>
+            <TextBox Grid.ColumnSpan="2" Grid.RowSpan="2" Grid.Row="2" Name="DescBox" FontSize="12" Background="#1d1d1d" Foreground="#ffffff" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Quasar never worked for me, so I made my own. You're seeing this because this mod has no description, or no mod is selected.&#xD;&#xA;&#xD;&#xA;Don't see a mod? The ID and folder names must match."/>
         </Grid>
-        <Grid Grid.Row="1" Name="Mods" Visibility="Visible">
+        <Grid Grid.Row="1" Name="Mods" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="4*"/>
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
-            <DataGrid Name="ModDataGrid"  Grid.Column="0" Grid.Row="0" Margin="10" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False"
+            <DataGrid Name="ModDataGrid"  Grid.Column="0" Grid.Row="0" Margin="10" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" CanUserSortColumns="False"
                       RowBackground="Red" AlternatingRowBackground="DarkRed" AutoGenerateColumns="False" SelectionChanged="currentrow">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="On" Binding="{Binding onoff, Mode=TwoWay}" IsReadOnly="False" Width="0.75*"/>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True" Width="4*"/>
                     <DataGridTextColumn Header="Type" Binding="{Binding Type}" IsReadOnly="True" Width="2*"/>
-                    <DataGridTextColumn Header="Category" Binding="{Binding Cat}" IsReadOnly="True" Width="2*"/>
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category}" IsReadOnly="True" Width="2*"/>
                     <DataGridTextColumn Header="Version" Binding="{Binding Version}" IsReadOnly="True" Width="2*"/>
                     <DataGridTextColumn Header="Link" Binding="{Binding Link}" IsReadOnly="True" Width="*"/>
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="New Mod"
-                      Click="New_OnClick"
-                      CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}"/>
                         <MenuItem Header="Edit Metadata"
                       Click="Edit_OnClick"
                       CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
@@ -136,6 +125,87 @@
                     </Style>
                 </RichTextBox.Resources>
             </RichTextBox>
+        </Grid>
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Name="DeployButton" Click="Deploy_Click" Grid.Column="0" ToolTip="Deploy mods to selected folder.">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image Name="DeployImage" Source="/Images/Deploy.png"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Button Name="NewButton" Click="New_OnClick" Grid.Column="1" ToolTip="Create a mod package.">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image Name="NewImage" Source="/Images/New.png"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Button Name="RefreshButton" Click="Refresh_Click" Grid.Column="2" ToolTip="Refresh mods.">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image Name="RefreshImage" Source="/Images/Refresh.png"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Button Name="DownloadButton" Click="Download_Click" Grid.Column="7" Grid.ColumnSpan="2">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image Name="DownloadImage" Source="/Images/DownloadUnsel.png"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <TextBlock Foreground="#e8feff" Grid.ColumnSpan="2" Grid.Column="5" HorizontalAlignment="Center" Text="Find More" VerticalAlignment="Center" FontSize="25" FontWeight="SemiBold"/>
+        </Grid>
+        <Grid Name="AssignWindow" Grid.Row="1" Grid.ColumnSpan="2" Visibility="Collapsed">
+            
+        </Grid>
+        <Grid Name="SettingsWindow" Grid.Row="1" Grid.ColumnSpan="2" Visibility="Visible">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid Background="#005ada">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Settings" Foreground="White" FontSize="25" FontWeight="SemiBold" TextDecorations="Underline"/>
+            </Grid>
+            <Grid Grid.Column="1" Background="#005ada">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="9*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="About Pulsar" Foreground="White" FontSize="25" FontWeight="SemiBold" TextDecorations="Underline"/>
+                <TextBox Grid.Row="1" Foreground="#b8dffd" Background="#005ada" BorderThickness="0" FontSize="12" VerticalScrollBarVisibility="Auto" TextWrapping="WrapWithOverflow" Text="Pulsar is a mod manager made by Solt11.&#xA;Current Version: Beta&#xA;&#xA;I developed this program because the current manager, Quasar, almost never works for me. Instead of going through and seeing how to fix it, I decided to test my programming skills and make my own.&#xA;&#xA;After I started development, a program called Fight Planner was created. I think it's amazing that we finally have a manager that works, but it lacks in the style department. It also doesn't have the ability to assign mods to other slots like Quasar did. &#xA;&#xA;My goal in this project is simple: Make a version of Quasar that works and looks cool.&#xA;&#xA;The most important feature to me that I wanted to add is built-in file conflict management. It's annoying to go to a party or something when I don't have much time, end up sending the mods over to my Switch, and discovering conflicts that take 15 minutes to delete using something like DBI for file management. So I wanted to have a solution that I could send the files over and be done with.&#xA;&#xA;The other one was having a button to open the folder containing the mods. I never remember where my Quasar mods are.&#xA;&#xA;This manager is inspired heavily by Aemulus Package Manager, by Tekka, made for packaging mods for Persona games. I did borrow some of their code, mainly their ParallelLogger. If they wish for its removal, I'd be more than happy to oblige."/>
+            </Grid>
+        </Grid>
+        <Grid Name="DownloadWindow" Grid.Row="1" Grid.ColumnSpan="2" Visibility="Collapsed">
+
         </Grid>
     </Grid>
 </Window>
