@@ -88,8 +88,13 @@
                 <RowDefinition Height="4*"/>
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
-            <DataGrid Name="ModDataGrid"  Grid.Column="0" Grid.Row="0" Margin="10" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" CanUserSortColumns="False"
-                      RowBackground="Red" AlternatingRowBackground="DarkRed" AutoGenerateColumns="False" SelectionChanged="currentrow">
+            <DataGrid Name="ModDataGrid"  Grid.Column="0" Grid.Row="0" Margin="10" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" ColumnWidth="*"
+                      RowBackground="#be5655" AlternatingRowBackground="#840000" AutoGenerateColumns="False" SelectionChanged="currentrow" Background="Black" SelectionMode="Single" SelectionUnit="FullRow" BorderBrush="#840000" Foreground="#ffd9da">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#840000" />
+                    </Style>
+                </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="On" Width="0.75*">
                         <DataGridTemplateColumn.CellTemplate>
