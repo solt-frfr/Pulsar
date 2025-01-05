@@ -8,6 +8,7 @@ using System.Windows;
 using System.Text.Json;
 using System.IO;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Pulsar
 {
@@ -20,6 +21,12 @@ namespace Pulsar
         public string Version { get; set; }
         public string Link { get; set; }
         public string ID { get; set; }
+        [JsonIgnore]
+        public bool IsChecked { get; set; }
+    }
+    public class Settings
+    {
+        public string DeployPath { get; set; }
     }
     public class Debug
     {

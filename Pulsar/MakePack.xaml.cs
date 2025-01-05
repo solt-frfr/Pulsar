@@ -31,16 +31,27 @@ namespace Pulsar
         {
             InitializeComponent();
             modmetadata = sender;
-            if (sender.Name != null)
+            try
             {
-                Title = $"Edit {sender.Name}";
-                NameBox.Text = sender.Name;
-                DescBox.Text = sender.Description;
-                TypeBox.Text = sender.Type;
-                CatBox.Text = sender.Category;
-                VersionBox.Text = sender.Version;
-                LinkBox.Text = sender.Link;
-                IDBox.Text = sender.ID;
+                if (sender.Name != null)
+                {
+                    Title = $"Edit {sender.Name}";
+                    NameBox.Text = sender.Name;
+                    DescBox.Text = sender.Description;
+                    TypeBox.Text = sender.Type;
+                    CatBox.Text = sender.Category;
+                    VersionBox.Text = sender.Version;
+                    LinkBox.Text = sender.Link;
+                    IDBox.Text = sender.ID;
+                    if (File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{sender.ID}\preview.png"))
+                    {
+                        OpenButton.IsEnabled = false;
+                    }
+                }
+            }
+            catch 
+            {
+                Close();
             }
         }
         private bool UserID = false;
