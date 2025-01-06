@@ -21,7 +21,13 @@
 
 ### Built-in Logging and Console.
 
-### Functioning Package Builder.
+### Package Builder.
+
+### Package Installer from archive.
+
+### Package Zipper using 7z.
+
+### Search/Sort Mods
 
 # Credits
 ## [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager)
