@@ -25,6 +25,9 @@ using AemulusModManager.Utilities;
 using Microsoft.Win32;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Quasar_Rewrite.Properties;
+using SevenZipExtractor;
+using System.Windows.Shell;
+using System.Runtime;
 
 namespace Pulsar
 {
@@ -73,6 +76,26 @@ namespace Pulsar
                 return null;
             }
         }
+
+        public string CreateLinkImage(string link)
+        {
+            if (link.Contains("gamebanana.com"))
+            {
+                return "Images/Gamebanana.png";
+            }
+            else if (link.Contains("github.com"))
+            {
+                return "Images/Github.png";
+            }
+            else if (!string.IsNullOrWhiteSpace(link))
+            {
+                return "Images/Web.png";
+            }
+            else
+            {
+                return null;
+            }
+        }
         public void Refresh()
         {
             try
@@ -82,12 +105,7 @@ namespace Pulsar
                     enabledmods.Clear();
                 }
                 catch { }
-                string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\enabledmods.json";
-                var jsonoptions = new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                };
-                enabledmods = JsonSerializer.Deserialize<List<string>>(filepath, jsonoptions);
+                enabledmods = QuickJson(false, enabledmods, "enabledmods.json");
             }
             catch { }
             ModDataGrid.Items.Clear();
@@ -116,6 +134,7 @@ namespace Pulsar
                             mod.IsChecked = true;
                         else
                             mod.IsChecked = false;
+                        mod.LinkImage = CreateLinkImage(mod.Link);
                         ModDataGrid.Items.Add(mod);
                         if (!Sort.Items.Contains(mod.Type))
                             Sort.Items.Add(mod.Type);
@@ -440,7 +459,34 @@ namespace Pulsar
 
         private void Deploy_Click(object sender, RoutedEventArgs e)
         {
-            ParallelLogger.Log("[INFO] If this was properly set up, it would deploy your mods.");
+            string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+            string jsonString = File.ReadAllText(settingspath);
+            var jsonoptions = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            Settings settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+            foreach (string ID in enabledmods)
+            {
+                string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
+                string destinationDir = settings.DeployPath + $@"\" + ID;
+                if (!Directory.Exists(sourceDir))
+                    throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
+                Directory.CreateDirectory(destinationDir);
+                foreach (string file in Directory.GetFiles(sourceDir))
+                {
+                    string fileName = System.IO.Path.GetFileName(file);
+                    string destFilePath = System.IO.Path.Combine(destinationDir, fileName);
+                    File.Copy(file, destFilePath, true);
+                    ParallelLogger.Log($@"[INFO] Copied {file} to {destFilePath}");
+                }
+                foreach (string subDir in Directory.GetDirectories(sourceDir))
+                {
+                    string subDirName = System.IO.Path.GetFileName(subDir);
+                    string destSubDirPath = System.IO.Path.Combine(destinationDir, subDirName);
+                    CopyDirectory(subDir, destSubDirPath, true);
+                }
+            }
         }
 
         private void ModsWindow(bool sender)
@@ -544,6 +590,7 @@ namespace Pulsar
                                 mod.IsChecked = true;
                             else
                                 mod.IsChecked = false;
+                            mod.LinkImage = CreateLinkImage(mod.Link);
                             ModDataGrid.Items.Add(mod);
                         }
                     }
@@ -567,12 +614,13 @@ namespace Pulsar
         {
             try
             {
-                SevenZipExtractor.SetLibraryPath($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\x86\7z.dll");
+                SevenZip.SevenZipExtractor.SetLibraryPath($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\x86\7z.dll");
                 System.Windows.Forms.OpenFileDialog openarchive = new System.Windows.Forms.OpenFileDialog();
                 openarchive.Filter = "Mod Archive (*.*)|*.*";
                 openarchive.Title = "Select Mod Archive";
                 string archivePath = null;
                 string filename = null;
+                string filetype = null;
                 string firstDirectoryPath = null;
                 string extpath = null;
                 string newpath = null;
@@ -580,37 +628,72 @@ namespace Pulsar
                 {
                     archivePath = openarchive.FileName;
                     filename = System.IO.Path.GetFileNameWithoutExtension(archivePath);
+                    filetype = System.IO.Path.GetExtension(archivePath);
                 }
+                ParallelLogger.Log($@"[DEBUG] File format {filetype}");
                 string outputFolder = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
-                using (var extractor = new SevenZipExtractor(archivePath))
+                if (filetype == ".rar")
                 {
-                    foreach (var fileData in extractor.ArchiveFileData)
+                    using (ArchiveFile archiveFile = new ArchiveFile(archivePath))
                     {
-                        if (fileData.IsDirectory)
+                        foreach (var fileData in archiveFile.Entries)
                         {
-                            var parts = fileData.FileName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                            if (parts.Length == 1)
+                            if (fileData.IsFolder)
                             {
-                                firstDirectoryPath = fileData.FileName.TrimEnd('/', '\\');
-                                ParallelLogger.Log($@"[DEBUG] Found first directory {firstDirectoryPath}");
-                                break;
+                                var parts = fileData.FileName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                                if (parts.Length == 1)
+                                {
+                                    firstDirectoryPath = fileData.FileName.TrimEnd('/', '\\');
+                                    ParallelLogger.Log($@"[DEBUG] Found first directory {firstDirectoryPath}");
+                                    break;
+                                }
                             }
                         }
+                        extpath = outputFolder + $@"\" + firstDirectoryPath.ToLower();
+                        newpath = outputFolder + $@"\" + filename.ToLower();
+                        Directory.CreateDirectory(extpath);
+                        archiveFile.Extract(outputFolder, true);
+                        string temppath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp";
                     }
-                    extractor.ExtractArchive(outputFolder);
-                    extpath = outputFolder + $@"\" + firstDirectoryPath;
-                    newpath = outputFolder + $@"\" + filename;
-                    if (Directory.Exists(extpath))
+                    ParallelLogger.Log($"[INFO] Extracted ''{firstDirectoryPath}''.");
+                }
+                else
+                {
+                    using (var extractor = new SevenZip.SevenZipExtractor(archivePath))
                     {
-                        Directory.Move(extpath, newpath);
-                        ParallelLogger.Log($@"[DEBUG] Renamed '{extpath}' to '{newpath}'");
+                        foreach (var fileData in extractor.ArchiveFileData)
+                        {
+                            if (fileData.IsDirectory)
+                            {
+                                var parts = fileData.FileName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                                if (parts.Length == 1)
+                                {
+                                    firstDirectoryPath = fileData.FileName.TrimEnd('/', '\\');
+                                    ParallelLogger.Log($@"[DEBUG] Found first directory {firstDirectoryPath}");
+                                    break;
+                                }
+                            }
+                        }
+                        extpath = outputFolder + $@"\" + firstDirectoryPath.ToLower();
+                        newpath = outputFolder + $@"\" + filename.ToLower();
+                        Directory.CreateDirectory(extpath);
+                        extractor.ExtractArchive(outputFolder);
+                        string temppath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp";
+                        if (Directory.Exists(extpath))
+                        {
+                            Directory.Move(extpath, temppath);
+                            Directory.Move(temppath, newpath);
+                            ParallelLogger.Log($@"[DEBUG] Renamed '{extpath}' to '{newpath}'");
+                        }
                     }
                 }
                 if (!File.Exists(newpath + $@"\meta.json"))
                 {
                     Meta extmod = new Meta();
                     extmod.Name = firstDirectoryPath;
-                    extmod.ID = filename;
+                    extmod.ID = filename.ToLower();
+                    if (File.Exists(newpath + $@"\preview.png"))
+                        extmod.ArchiveImage = true;
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
@@ -647,15 +730,10 @@ namespace Pulsar
                 var row = checkBox.DataContext as Meta;
                 if (row != null)
                 {
-                    enabledmods.Add(row.ID);
-                    string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\enabledmods.json";
-                    var jsonoptions = new JsonSerializerOptions
-                    {
-                        WriteIndented = true
-                    };
-                    string jsonString = JsonSerializer.Serialize(enabledmods, jsonoptions);
-                    File.WriteAllText(filepath, jsonString);
-                    enabledmods = JsonSerializer.Deserialize<List<string>>(jsonString, jsonoptions);
+                    if (!enabledmods.Contains(row.ID))
+                        enabledmods.Add(row.ID);
+                    QuickJson(true, enabledmods, "enabledmods.json");
+                    enabledmods = QuickJson(false, enabledmods, "enabledmods.json");
                 }
             }
         }
@@ -664,23 +742,39 @@ namespace Pulsar
         {
             if (sender is System.Windows.Controls.CheckBox checkBox)
             {
-                // Get the DataContext of the row
                 var row = checkBox.DataContext as Meta;
                 if (row != null)
                 {
                     if (enabledmods.Contains(row.ID))
-                    enabledmods.Remove(row.ID);
-                    string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\enabledmods.json";
-                    var jsonoptions = new JsonSerializerOptions
-                    {
-                        WriteIndented = true
-                    };
-                    string jsonString = JsonSerializer.Serialize(enabledmods, jsonoptions);
-                    File.WriteAllText(filepath, jsonString);
-                    enabledmods = JsonSerializer.Deserialize<List<string>>(jsonString, jsonoptions);
+                        enabledmods.Remove(row.ID);
+                    QuickJson(true, enabledmods, "enabledmods.json");
+                    enabledmods = QuickJson(false, enabledmods, "enabledmods.json");
                 }
             }
         }
-
+        private List<string> QuickJson(bool write, List<string> what, string filename)
+        {
+            string root = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\";
+            if (write)
+            {
+                var jsonoptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+                string jsonString = JsonSerializer.Serialize(what, jsonoptions);
+                File.WriteAllText(root + filename, jsonString);
+                return null;
+            }
+            else
+            {
+                var jsonoptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+                string jsonString = File.ReadAllText(root + filename);
+                what = JsonSerializer.Deserialize<List<string>>(jsonString, jsonoptions);
+                return what;
+            }
+        }
     }
 }

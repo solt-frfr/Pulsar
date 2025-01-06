@@ -40,6 +40,9 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="SevenZipExtractor, Version=1.0.19.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SevenZipExtractor.1.0.19\lib\net45\SevenZipExtractor.dll</HintPath>
+    </Reference>
     <Reference Include="SevenZipSharp, Version=0.64.3890.29348, Culture=neutral, PublicKeyToken=20de82c62b055c88, processorArchitecture=MSIL">
       <HintPath>..\packages\SevenZipSharp.0.64\lib\SevenZipSharp.dll</HintPath>
     </Reference>
@@ -178,6 +181,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Borrowed Utilities\7z.dll" />
+    <Resource Include="Images\Github.png" />
+    <Resource Include="Images\Gamebanana.png" />
     <Resource Include="Images\Web.png" />
     <Resource Include="Images\InstallArchive.png" />
   </ItemGroup>
@@ -188,5 +193,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\SevenZipSharp.Interop.19.1.0\build\SevenZipSharp.Interop.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SevenZipSharp.Interop.19.1.0\build\SevenZipSharp.Interop.targets'))" />
+    <Error Condition="!Exists('..\packages\SevenZipExtractor.1.0.19\build\SevenZipExtractor.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SevenZipExtractor.1.0.19\build\SevenZipExtractor.targets'))" />
   </Target>
+  <Import Project="..\packages\SevenZipExtractor.1.0.19\build\SevenZipExtractor.targets" Condition="Exists('..\packages\SevenZipExtractor.1.0.19\build\SevenZipExtractor.targets')" />
 </Project>

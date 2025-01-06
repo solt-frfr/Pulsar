@@ -7,6 +7,23 @@
         mc:Ignorable="d"
         Title="Pulsar" Height="500" Width="800" MinHeight="500" MinWidth="800" 
         Background="#000000" Icon="/Pulsar.png">
+    <Window.Resources>
+        <Style x:Key="Transparent Button" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -29,7 +46,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <Grid>
-                    <Button Name="ModsButton" Margin="5" Click="Mods_Click">
+                    <Button Name="ModsButton" Margin="5" Click="Mods_Click" Cursor="Hand">
                         <Button.Template>
                             <ControlTemplate>
                                 <Image Name="ModsImage" Source="/Images/ModsSel.png"/>
@@ -38,7 +55,7 @@
                     </Button>
                 </Grid>
                 <Grid Grid.Column="1">
-                    <Button Name="AssignButton" Margin="5" Click="Assign_Click">
+                    <Button Name="AssignButton" Margin="5" Click="Assign_Click" Cursor="Hand">
                         <Button.Template>
                             <ControlTemplate>
                                 <Image Name="AssignImage" Source="/Images/AssignUnsel.png"/>
@@ -47,7 +64,7 @@
                     </Button>
                 </Grid>
                 <Grid Grid.Column="2">
-                    <Button Name="SettingsButton" Margin="5" Click="Settings_Click">
+                    <Button Name="SettingsButton" Margin="5" Click="Settings_Click" Cursor="Hand">
                         <Button.Template>
                             <ControlTemplate>
                                 <Image Name="SettingsImage" Source="/Images/SettingsUnsel.png"/>
@@ -89,7 +106,7 @@
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
             <DataGrid Name="ModDataGrid"  Grid.Column="0" Grid.Row="0" Margin="10" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" ColumnWidth="*"
-                      RowBackground="#be5655" AlternatingRowBackground="#840000" AutoGenerateColumns="False" SelectionChanged="currentrow" Background="Black" SelectionMode="Single" SelectionUnit="FullRow" BorderBrush="#840000" Foreground="#ffd9da">
+                      RowBackground="#be5655" AlternatingRowBackground="#840000" AutoGenerateColumns="False" SelectionChanged="currentrow" Background="Black" SelectionMode="Single" SelectionUnit="FullRow" BorderBrush="#840000" Foreground="#ffd9da" RowHeaderWidth="0">
                 <DataGrid.Resources>
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="Background" Value="#840000" />
@@ -99,7 +116,7 @@
                     <DataGridTemplateColumn Header="On" Width="0.75*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox Name="RowCheckBox" IsChecked="{Binding IsChecked}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" />
+                                <CheckBox Name="RowCheckBox" IsChecked="{Binding IsChecked}" Cursor="Hand" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -110,8 +127,8 @@
                     <DataGridTemplateColumn Header="Link">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Name="LinkButton" CommandParameter="{Binding Link}" Click="OpenLink_Click">
-                                    <Image Name="LinkImage" Source="/Images/Web.png"/>
+                                <Button Name="LinkButton" CommandParameter="{Binding Link}" Click="OpenLink_Click" Style="{StaticResource Transparent Button}" Cursor="Hand">
+                                    <Image Name="LinkImage" Source="{Binding LinkImage}" RenderSize="56,56"/>
                                 </Button>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -157,42 +174,42 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Name="DeployButton" Click="Deploy_Click" Grid.Column="0" ToolTip="Deploy mods to selected folder.">
+            <Button Name="DeployButton" Click="Deploy_Click" Grid.Column="0" Cursor="Hand" ToolTip="Deploy mods to selected folder.">
                 <Button.Template>
                     <ControlTemplate>
                         <Image Name="DeployImage" Source="/Images/Deploy.png"/>
                     </ControlTemplate>
                 </Button.Template>
             </Button>
-            <Button Name="NewButton" Click="New_OnClick" Grid.Column="1" ToolTip="Create a mod package.">
+            <Button Name="NewButton" Click="New_OnClick" Grid.Column="1" Cursor="Hand" ToolTip="Create a mod package.">
                 <Button.Template>
                     <ControlTemplate>
                         <Image Name="NewImage" Source="/Images/New.png"/>
                     </ControlTemplate>
                 </Button.Template>
             </Button>
-            <Button Name="RefreshButton" Click="Refresh_Click" Grid.Column="2" ToolTip="Refresh mods and settings.">
+            <Button Name="RefreshButton" Click="Refresh_Click" Grid.Column="2" Cursor="Hand" ToolTip="Refresh mods and settings.">
                 <Button.Template>
                     <ControlTemplate>
                         <Image Name="RefreshImage" Source="/Images/Refresh.png"/>
                     </ControlTemplate>
                 </Button.Template>
             </Button>
-            <Button Name="OpenFolderButton" Click="OpenFolder_Click" Grid.Column="3" ToolTip="Open the mods folder.">
+            <Button Name="OpenFolderButton" Click="OpenFolder_Click" Grid.Column="3" Cursor="Hand" ToolTip="Open the mods folder.">
                 <Button.Template>
                     <ControlTemplate>
                         <Image Name="OpenFolderImage" Source="/Images/OpenFolder.png"/>
                     </ControlTemplate>
                 </Button.Template>
             </Button>
-            <Button Name="InstallArchiveButton" Click="InstallArchive_Click" Grid.Column="4" ToolTip="Install a mod from an archive.">
+            <Button Name="InstallArchiveButton" Click="InstallArchive_Click" Grid.Column="4" Cursor="Hand" ToolTip="Install a mod from an archive.">
                 <Button.Template>
                     <ControlTemplate>
                         <Image Name="InstallArchiveImage" Source="/Images/InstallArchive.png"/>
                     </ControlTemplate>
                 </Button.Template>
             </Button>
-            <Button Name="DownloadButton" Click="Download_Click" Grid.Column="7" Grid.ColumnSpan="2">
+            <Button Name="DownloadButton" Click="Download_Click" Grid.Column="7" Cursor="Hand" Grid.ColumnSpan="2">
                 <Button.Template>
                     <ControlTemplate>
                         <Image Name="DownloadImage" Source="/Images/DownloadUnsel.png"/>

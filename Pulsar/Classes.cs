@@ -23,6 +23,10 @@ namespace Pulsar
         public string ID { get; set; }
         [JsonIgnore]
         public bool IsChecked { get; set; }
+        [JsonIgnore]
+        public string LinkImage { get; set; }
+        [JsonIgnore]
+        public bool ArchiveImage { get; set; }
     }
     public class Settings
     {

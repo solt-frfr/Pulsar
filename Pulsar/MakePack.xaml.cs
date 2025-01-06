@@ -43,10 +43,7 @@ namespace Pulsar
                     VersionBox.Text = sender.Version;
                     LinkBox.Text = sender.Link;
                     IDBox.Text = sender.ID;
-                    if (File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{sender.ID}\preview.png"))
-                    {
-                        OpenButton.IsEnabled = false;
-                    }
+                    OpenButton.IsEnabled = !sender.ArchiveImage;
                 }
             }
             catch 
