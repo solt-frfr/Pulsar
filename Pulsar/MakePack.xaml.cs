@@ -18,6 +18,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Reflection;
 using System.IO;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.LinkLabel;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using System.Diagnostics;
 
 namespace Pulsar
 {
@@ -27,6 +32,8 @@ namespace Pulsar
     public partial class MakePack : Window
     {
         private Meta modmetadata = new Meta();
+        private List<string> authors = new List<string>();
+        private List<System.Windows.Controls.TextBox> authorboxes = new List<System.Windows.Controls.TextBox>();
         public MakePack(Meta sender)
         {
             InitializeComponent();
@@ -44,12 +51,27 @@ namespace Pulsar
                     LinkBox.Text = sender.Link;
                     IDBox.Text = sender.ID;
                     OpenButton.IsEnabled = !sender.ArchiveImage;
+                    authors = sender.Authors;
+                    InfoCategoryBox.SelectedIndex = sender.InfoCat;
+                    try
+                    {
+                        authorboxes.Add(AuthorBox0);
+                        authorboxes[0].Text = authors[0];
+                        for (int i = 1; i < authors.Count; i++)
+                        {
+                            Add_Click(new object(), new RoutedEventArgs());
+                            authorboxes[i].Text = authors[i];
+                        }
+                    }
+                    catch { }
                 }
             }
-            catch 
+            catch
             {
                 Close();
             }
+            if (!authorboxes.Contains(AuthorBox0))
+                authorboxes.Add(AuthorBox0);
         }
         private bool UserID = false;
         private void Open_Click(object sender, RoutedEventArgs e)
@@ -77,23 +99,145 @@ namespace Pulsar
             modmetadata.Version = VersionBox.Text;
             modmetadata.Link = LinkBox.Text;
             modmetadata.ID = IDBox.Text;
-            string path = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
-            var jsonoptions = new JsonSerializerOptions
+            modmetadata.Authors = new List<string>();
+            modmetadata.InfoCat = InfoCategoryBox.SelectedIndex;
+            if (string.IsNullOrWhiteSpace(modmetadata.ID))
             {
-                WriteIndented = true
-            };
-            string jsonString = JsonSerializer.Serialize(modmetadata, jsonoptions);
-            string filepath = path + $@"\{IDBox.Text}\meta.json";
-            Directory.CreateDirectory(path + $@"\{IDBox.Text}");
-            File.WriteAllText(filepath, jsonString);
-            AemulusModManager.Utilities.ParallelLogger.Log($"[INFO] meta.json written to {filepath}.");
-            filepath = path + $@"\{IDBox.Text}\Preview.png";
-            if (File.Exists(PreviewBox.Text))
-            {
-                System.IO.File.Copy(PreviewBox.Text, filepath, true);
-                AemulusModManager.Utilities.ParallelLogger.Log($"[INFO] Preview.png written to {filepath}.");
+                AemulusModManager.Utilities.ParallelLogger.Log($"[ERROR] The ID was blank.");
+                Close();
             }
-            Close();
+            else
+            {
+                try
+                {
+                    for (int i = 0; i < authorboxes.Count; i++)
+                    {
+                        modmetadata.Authors.Add(authorboxes[i].Text);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AemulusModManager.Utilities.ParallelLogger.Log($"[ERROR] {ex}");
+                }
+                string path = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
+                var jsonoptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+                string jsonString = JsonSerializer.Serialize(modmetadata, jsonoptions);
+                string filepath = path + $@"\{IDBox.Text}\meta.json";
+                Directory.CreateDirectory(path + $@"\{IDBox.Text}");
+                File.WriteAllText(filepath, jsonString);
+                AemulusModManager.Utilities.ParallelLogger.Log($"[INFO] meta.json written to {filepath}.");
+                filepath = path + $@"\{IDBox.Text}\preview.webp";
+                if (File.Exists(PreviewBox.Text))
+                {
+                    using (SixLabors.ImageSharp.Image image = SixLabors.ImageSharp.Image.Load(PreviewBox.Text))
+                    {
+                        image.Save(filepath, new WebpEncoder());
+                        AemulusModManager.Utilities.ParallelLogger.Log($"[INFO] Image converted to WebP successfully!");
+                    }
+                }
+                if (OverrideBox.IsChecked == true)
+                {
+                    NewInfo();
+                }
+                Close();
+            }
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Controls.TextBox newTextBox = new System.Windows.Controls.TextBox
+            {
+                Name = $"AuthorBox{authorboxes.Count}",
+                Height = 20,
+                Width = 179,
+                Margin = new Thickness(5),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Background = (SolidColorBrush)new BrushConverter().ConvertFromString("#a10943"),
+                Foreground = (SolidColorBrush)new BrushConverter().ConvertFromString("#ffd9da"),
+            };
+            try
+            {
+                newTextBox.Text = authors[authorboxes.Count];
+            }
+            catch { }
+            TextBoxContainer.Children.Add(newTextBox);
+            authorboxes.Add(newTextBox);
+            Height = Height + 30;
+        }
+
+        public static string InfoCatDeEnum(int i)
+        {
+            if (i == 0)
+            {
+                return "Fighter";
+            }
+            else if (i == 1)
+            {
+                return "Stage";
+            }
+            else if (i == 2)
+            {
+                return "Effects";
+            }
+            else if (i == 3)
+            {
+                return "UI";
+            }
+            else if (i == 4)
+            {
+                return "Param";
+            }
+            else if (i == 5)
+            {
+                return "Music";
+            }
+            else if (i == 6)
+            {
+                return "Misc";
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public static int InfoCatEnum(string str)
+        {
+            if (str.Contains("Fighter"))
+            {
+                return 0;
+            }
+            else if (str.Contains("Stage"))
+            {
+                return 1;
+            }
+            else if (str.Contains("Effects"))
+            {
+                return 2;
+            }
+            else if (str.Contains("UI"))
+            {
+                return 3;
+            }
+            else if (str.Contains("Param"))
+            {
+                return 4;
+            }
+            else if (str.Contains("Music"))
+            {
+                return 5;
+            }
+            else if (str.Contains("Misc"))
+            {
+                return 6;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         private void NameChanged(object sender, TextChangedEventArgs e)
@@ -125,6 +269,27 @@ namespace Pulsar
         private void IDBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             UserID = true;
+        }
+
+        private void NewInfo()
+        {
+            string filePath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{modmetadata.ID}\info.toml";
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                writer.WriteLine($"display_name = \"{modmetadata.Name}\"");
+                writer.Write($"authors = \"{modmetadata.Authors[0]}");
+                for (int i = 1; i < modmetadata.Authors.Count; i++)
+                {
+                    writer.Write($", {modmetadata.Authors[i]}");
+                }
+                writer.WriteLine("\"");
+                writer.WriteLine($"version = \"{modmetadata.Version}\"");
+                writer.WriteLine("description = \"\"\"");
+                writer.WriteLine($"{modmetadata.Description}");
+                writer.WriteLine("\"\"\"");
+                writer.WriteLine($"category = \"{InfoCatDeEnum(modmetadata.InfoCat)}\"");
+                AemulusModManager.Utilities.ParallelLogger.Log($"[INFO] info.toml written to {filePath}.");
+            }
         }
     }
 }

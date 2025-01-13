@@ -51,7 +51,7 @@ namespace Pulsar
             if (url.StartsWith("quasar:"))
             {
                 ParallelLogger.Log($@"[DEBUG] Handling custom protocol: {url}");
-                Alert aw = new Alert($@"Handling custom protocol: {url}");
+                Alert aw = new Alert($@"Handling custom protocol: {url}", false);
                 aw.ShowDialog();
             }
             else
@@ -60,5 +60,4 @@ namespace Pulsar
             }
         }
     }
-
 }

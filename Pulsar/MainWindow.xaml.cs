@@ -28,6 +28,8 @@ using Quasar_Rewrite.Properties;
 using SevenZipExtractor;
 using System.Windows.Shell;
 using System.Runtime;
+using System.Security.Policy;
+using Pulsar.Utilities;
 
 namespace Pulsar
 {
@@ -79,22 +81,26 @@ namespace Pulsar
 
         public string CreateLinkImage(string link)
         {
-            if (link.Contains("gamebanana.com"))
+            try
             {
-                return "Images/Gamebanana.png";
+                if (link.Contains("gamebanana.com"))
+                {
+                    return "Images/Gamebanana.png";
+                }
+                else if (link.Contains("github.com"))
+                {
+                    return "Images/Github.png";
+                }
+                else if (!string.IsNullOrWhiteSpace(link))
+                {
+                    return "Images/Web.png";
+                }
+                else
+                {
+                    return null;
+                }
             }
-            else if (link.Contains("github.com"))
-            {
-                return "Images/Github.png";
-            }
-            else if (!string.IsNullOrWhiteSpace(link))
-            {
-                return "Images/Web.png";
-            }
-            else
-            {
-                return null;
-            }
+            catch { return null; }
         }
         public void Refresh()
         {
@@ -117,9 +123,20 @@ namespace Pulsar
             string[] griditems = CountFolders(path);
             foreach (string modpath in griditems)
             {
-                ParallelLogger.Log($"[INFO] Found folder {modpath}");
                 Meta mod = new Meta();
                 string filepath = modpath + $@"\meta.json";
+                if (!File.Exists(filepath))
+                {
+                    string genid = modpath.Replace(path, "");
+                    mod.Name = mod.ID = genid = genid.TrimStart('\\');
+                    ParallelLogger.Log($@"[INFO] {genid} doesn't have a meta.json. Generating one.");
+                    var jsonoptions = new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    };
+                    string jsonString = JsonSerializer.Serialize(mod, jsonoptions);
+                    File.WriteAllText(filepath, jsonString);
+                }
                 if (File.Exists(filepath))
                 {
                     var jsonoptions = new JsonSerializerOptions
@@ -136,9 +153,9 @@ namespace Pulsar
                             mod.IsChecked = false;
                         mod.LinkImage = CreateLinkImage(mod.Link);
                         ModDataGrid.Items.Add(mod);
-                        if (!Sort.Items.Contains(mod.Type))
+                        if (!Sort.Items.Contains(mod.Type) && !string.IsNullOrEmpty(mod.Type))
                             Sort.Items.Add(mod.Type);
-                        if (!Sort2.Items.Contains(mod.Category))
+                        if (!Sort2.Items.Contains(mod.Category) && !string.IsNullOrEmpty(mod.Category))
                             Sort2.Items.Add(mod.Category);
                     }
                     else
@@ -191,6 +208,7 @@ namespace Pulsar
         private void New_OnClick(object sender, RoutedEventArgs e)
         {
             MakePack newpack = new MakePack(new Meta());
+            Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
             newpack.ShowDialog();
             Refresh();
         }
@@ -199,6 +217,7 @@ namespace Pulsar
         {
             Meta row = (Meta)ModDataGrid.SelectedItem;
             MakePack edit = new MakePack(row);
+            Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
             try
             {
                 edit.ShowDialog();
@@ -235,7 +254,7 @@ namespace Pulsar
 
         private void Assign_OnClick(object sender, RoutedEventArgs e)
         {
-            Close();
+
         }
 
         private void Zip_OnClick(object sender, RoutedEventArgs e)
@@ -287,7 +306,21 @@ namespace Pulsar
 
         private void Delete_OnClick(object sender, RoutedEventArgs e)
         {
-            Close();
+            
+            foreach (var item in ModDataGrid.SelectedItems)
+            {
+                Meta row = (Meta)item;
+                if (row != null)
+                {
+                    Alert aw = new Alert($@"Are you sure you want to delete {row.Name}?", false);
+                    aw.OnAlertHandled = () =>
+                    {
+                        Directory.Delete($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}", true);
+                    };
+                    aw.ShowDialog();
+                }
+            }
+            Refresh();
         }
 
         private void currentrow(object sender, SelectionChangedEventArgs e)
@@ -306,9 +339,39 @@ namespace Pulsar
             }
             try
             {
-                if (File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\preview.png"))
+                if (row.Authors != null || !string.IsNullOrWhiteSpace(row.Authors[0]))
                 {
-                    Preview.Source = new BitmapImage(new Uri($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\Preview.png", UriKind.Absolute));
+                    string authors = $"Authors of {row.Name}:\n";
+                    for (int i = 0; i < row.Authors.Count; i++)
+                    {
+                        authors = authors + "\n" + row.Authors[i];
+                    }
+                    AuthorBox.Text = authors;
+                    if (authors.Trim() == $"Authors of {row.Name}:\n".Trim())
+                    {
+                        AuthorBox.Text = "Solt11 made Pulsar.\n\nAuthors of mods will show up here if provided.";
+                    }
+                }
+                else
+                    AuthorBox.Text = "Solt11 made Pulsar.\n\nAuthors of mods will show up here if provided.";
+            }
+            catch
+            {
+                AuthorBox.Text = "Solt11 made Pulsar.\n\nAuthors of mods will show up here if provided.";
+            }
+            try
+            {
+                if (File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\preview.webp"))
+                {
+                    BitmapImage bitmap = new BitmapImage();
+                    using (FileStream fs = new FileStream($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\preview.webp", FileMode.Open, FileAccess.Read))
+                    {
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.StreamSource = fs;
+                        bitmap.EndInit();
+                    }
+                    Preview.Source = bitmap;
                 }
                 else
                 {
@@ -624,6 +687,10 @@ namespace Pulsar
                 string firstDirectoryPath = null;
                 string extpath = null;
                 string newpath = null;
+                string temppath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp";
+                string outputFolder = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
+                Directory.Delete(temppath, true);
+                Directory.CreateDirectory(temppath);
                 if (openarchive.ShowDialog() != null)
                 {
                     archivePath = openarchive.FileName;
@@ -631,7 +698,6 @@ namespace Pulsar
                     filetype = System.IO.Path.GetExtension(archivePath);
                 }
                 ParallelLogger.Log($@"[DEBUG] File format {filetype}");
-                string outputFolder = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
                 if (filetype == ".rar")
                 {
                     using (ArchiveFile archiveFile = new ArchiveFile(archivePath))
@@ -649,13 +715,11 @@ namespace Pulsar
                                 }
                             }
                         }
-                        extpath = outputFolder + $@"\" + firstDirectoryPath.ToLower();
+                        extpath = temppath + $@"\" + firstDirectoryPath.ToLower();
                         newpath = outputFolder + $@"\" + filename.ToLower();
                         Directory.CreateDirectory(extpath);
-                        archiveFile.Extract(outputFolder, true);
-                        string temppath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp";
+                        archiveFile.Extract(temppath, true);
                     }
-                    ParallelLogger.Log($"[INFO] Extracted ''{firstDirectoryPath}''.");
                 }
                 else
                 {
@@ -674,26 +738,47 @@ namespace Pulsar
                                 }
                             }
                         }
-                        extpath = outputFolder + $@"\" + firstDirectoryPath.ToLower();
+                        extpath = temppath + $@"\" + firstDirectoryPath.ToLower();
                         newpath = outputFolder + $@"\" + filename.ToLower();
                         Directory.CreateDirectory(extpath);
-                        extractor.ExtractArchive(outputFolder);
-                        string temppath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp";
-                        if (Directory.Exists(extpath))
-                        {
-                            Directory.Move(extpath, temppath);
-                            Directory.Move(temppath, newpath);
-                            ParallelLogger.Log($@"[DEBUG] Renamed '{extpath}' to '{newpath}'");
-                        }
+                        extractor.ExtractArchive(temppath);
                     }
                 }
-                if (!File.Exists(newpath + $@"\meta.json"))
+                if (Directory.Exists(extpath))
+                {
+                    try
+                    {
+                        Directory.Move(extpath, newpath);
+                        ParallelLogger.Log($@"[DEBUG] Renamed '{extpath}' to '{newpath}'");
+                        ParallelLogger.Log($"[INFO] Extracted ''{firstDirectoryPath}''.");
+                    }
+                    catch 
+                    {
+                        ParallelLogger.Log($@"[ERROR] Folder in use, fix code later when the notfication box works");
+                    }
+                }
+                if (File.Exists(newpath + $@"\meta.json"))
+                {
+                    
+                }
+                if (File.Exists(newpath + $@"\info.toml"))
+                {
+                    Meta extmod = Parser.InfoTOML(newpath + $@"\info.toml");
+                    extmod.ID = filename.ToLower();
+                    if (File.Exists(newpath + $@"\preview.png"))
+                        extmod.ArchiveImage = true;
+                    Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
+                    MakePack finish = new MakePack(extmod);
+                    finish.ShowDialog();
+                }
+                else
                 {
                     Meta extmod = new Meta();
                     extmod.Name = firstDirectoryPath;
                     extmod.ID = filename.ToLower();
                     if (File.Exists(newpath + $@"\preview.png"))
                         extmod.ArchiveImage = true;
+                    Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }

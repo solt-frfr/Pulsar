@@ -24,10 +24,11 @@
 ### Package Builder.
 
 ### Package Installer from archive.
+ Generates Pulsar metadata from info.toml if found.
 
 ### Package Zipper using 7z.
 
-### Search/Sort Mods
+### Search/Sort Installed Mods
 
 # Credits
 ## [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager)

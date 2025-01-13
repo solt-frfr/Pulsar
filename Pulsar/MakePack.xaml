@@ -5,22 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pulsar"
         mc:Ignorable="d"
-        Title="Create Mod" Height="330" Width="300" MinHeight="330" MinWidth="300" Background="#e43079">
+        Title="Create Mod" Height="460" Width="300" ResizeMode="NoResize" Background="#e43079">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="90"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <TextBlock Text="Name" Foreground="#ffd9da" Grid.Row="0" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBlock Text="Version" Foreground="#ffd9da" Grid.Row="2" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -28,22 +32,50 @@
         <TextBlock Text="Category" ToolTip="''Subcategory'' on Gamebanana." Foreground="#ffd9da" Grid.Row="4" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBlock Text="Link" ToolTip="Gamebanana or other source link. Gamebanana links allow updates to happen automatically." Foreground="#ffd9da" Grid.Row="5" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBlock Text="ID" ToolTip="Helps to differenciate mods that happen to have the same name. Will be used as the folder name."  Foreground="#ffd9da" Grid.Row="6" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <TextBlock Text="Preview" Foreground="#ffd9da" Grid.Row="7" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Text="Preview" ToolTip="Encoding may take a moment if including a preview." Foreground="#ffd9da" Grid.Row="7" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Text="Category for info.toml" ToolTip="The ''category'' used for Arcopolis' mod manager's info.toml" Foreground="#ffd9da" Grid.Column="1" Grid.Row="11" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Grid Grid.Row="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Authors" Foreground="#ffd9da" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Button Name="AddButton" Grid.Column="1" Click="Add_Click" FontSize="30" VerticalContentAlignment="Center">
+               <TextBlock Text="+" FontSize="20" TextAlignment="Center" VerticalAlignment="Center" Height="30"/>
+            </Button>
+        </Grid>
+        <TextBlock Text="Override info.toml?" ToolTip="If checked, it will generate its own info.toml to be used in Arcopolis' mod manager ingame." Foreground="#ffd9da" Grid.Row="10" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1"/>
         <TextBox Name="NameBox" TextChanged="NameChanged" Margin="5" Grid.Column="1" Grid.Row="0" Foreground="#ffd9da" Background="#a10943"/>
-        <TextBox Name="DescBox" Margin="5" Grid.Column="1" Grid.Row="1" Foreground="#ffd9da" Background="#a10943"/>
+        <TextBox Name="DescBox" TextWrapping="WrapWithOverflow" AcceptsReturn="True" Margin="5" Grid.Column="1" Grid.Row="1" Foreground="#ffd9da" Background="#a10943"/>
         <TextBox Name="VersionBox" Margin="5" Grid.Column="1" Grid.Row="2" Foreground="#ffd9da" Background="#a10943"/>
         <TextBox Name="TypeBox" ToolTip="''Supercategory'' on Gamebanana." Margin="5" Grid.Column="1" Grid.Row="3" Foreground="#ffd9da" Background="#a10943"/>
         <TextBox Name="CatBox" ToolTip="''Subcategory'' on Gamebanana." Margin="5" Grid.Column="1" Grid.Row="4" Foreground="#ffd9da" Background="#a10943"/>
         <TextBox Name="LinkBox" ToolTip="Gamebanana or other source link. Gamebanana links allow updates to happen automatically." Margin="5" Grid.Column="1" Grid.Row="5" Foreground="#ffd9da" Background="#a10943"/>
         <TextBox Name="IDBox" TextChanged="IDChanged" KeyDown="IDBox_KeyDown" ToolTip="Helps to differenciate mods that happen to have the same name. Will be used as the folder name." Margin="5" Grid.Column="1" Grid.Row="6" Foreground="#ffd9da" Background="#a10943"/>
+        <TextBox Name="AuthorBox0" Margin="5" Grid.Column="1" Grid.Row="8" Foreground="#ffd9da" Background="#a10943"/>
+        <Grid Grid.Row="9" Grid.Column="1">
+            <StackPanel x:Name="TextBoxContainer" VerticalAlignment="Top">
+                <!-- TextBox controls will be added here dynamically -->
+            </StackPanel>
+        </Grid>
         <Grid Grid.Row="7" Grid.Column="1" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <Button Name="OpenButton" Click="Open_Click">Open</Button>
-            <TextBox Name="PreviewBox" IsEnabled="False" Grid.Column="1" Grid.Row="6" Foreground="#ffd9da" Background="#a10943"/>
+            <TextBox Name="PreviewBox" ToolTip="Encoding may take a moment if including a preview." IsReadOnly="True" Grid.Column="1" Grid.Row="6" Foreground="#ffd9da" Background="#a10943"/>
         </Grid>
+        <CheckBox Name="OverrideBox" ToolTip="If checked, it will generate its own info.toml to be used in Arcopolis' mod manager ingame." Grid.Column="0" Grid.Row="10" Foreground="#ffd9da" Background="#a10943" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ComboBox Name="InfoCategoryBox" ToolTip="The ''category'' used for Arcopolis' mod manager's info.toml" Grid.Column="0" Grid.Row="11" Margin="5">
+            <ComboBoxItem IsSelected="True" Content="Fighter"/>
+            <ComboBoxItem Content="Stage"/>
+            <ComboBoxItem Content="Effects"/>
+            <ComboBoxItem Content="UI"/>
+            <ComboBoxItem Content="Param"/>
+            <ComboBoxItem Content="Music"/>
+            <ComboBoxItem Content="Misc"/>
+        </ComboBox>
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -52,7 +84,7 @@
             </Grid.RowDefinitions>
             <TextBlock Text="Description" Foreground="#ffd9da" Grid.Row="0" FontWeight="ExtraBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>
-        <Grid Grid.Row="8" Grid.ColumnSpan="2">
+        <Grid Grid.Row="12" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>

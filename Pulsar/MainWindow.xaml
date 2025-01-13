@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pulsar"
         mc:Ignorable="d"
-        Title="Pulsar" Height="500" Width="800" MinHeight="500" MinWidth="800" 
+        Title="Pulsar" Height="500" Width="1020" MinHeight="500" MinWidth="1020" 
         Background="#000000" Icon="/Pulsar.png">
     <Window.Resources>
         <Style x:Key="Transparent Button" TargetType="Button">
@@ -27,6 +27,7 @@
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -98,7 +99,14 @@
                 <RowDefinition Height="1.5*"/>
             </Grid.RowDefinitions>
             <Image Name="Preview" Source="/Images/preview.png" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Center" Height="Auto" Grid.ColumnSpan="2"/>
-            <TextBox Grid.ColumnSpan="2" Grid.RowSpan="2" Grid.Row="2" Name="DescBox" FontSize="12" Background="#1d1d1d" Foreground="#ffffff" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Quasar never worked for me, so I made my own. You're seeing this because this mod has no description, or no mod is selected.&#xA;&#xA;Don't see a mod? The ID and folder names must match.&#xD;&#xA;&#xD;&#xA;Confused about the buttons at the bottom? Hover over them for more info."/>
+            <Grid Grid.ColumnSpan="2" Grid.RowSpan="2" Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBox Name="DescBox" FontSize="12" Background="#1d1d1d" Foreground="#ffffff" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Quasar never worked for me, so I made my own. You're seeing this because this mod has no description, or no mod is selected.&#xA;&#xA;Don't see a mod? The ID and folder names must match.&#xA;&#xA;Confused about the buttons at the bottom? Hover over them for more info."/>
+                <TextBox Name="AuthorBox" Grid.Column="1" FontSize="12" Background="#1d1d1d" Foreground="#ffffff" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Solt11 made Pulsar.&#xA;&#xA;Authors of mods will show up here if provided."/>
+            </Grid>
         </Grid>
         <Grid Grid.Row="1" Name="Mods" Visibility="Visible">
             <Grid.RowDefinitions>
@@ -265,6 +273,32 @@
         </Grid>
         <Grid Name="DownloadWindow" Grid.Row="1" Grid.ColumnSpan="2" Visibility="Collapsed">
 
+        </Grid>
+        <Grid Name="Devlog" Grid.Column="2" Grid.RowSpan="3" Visibility="Visible">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="10*"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False"/>
+            <TextBlock Text="Conflict Management" Grid.Row="1" Grid.Column="1" Foreground="White" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" IsChecked="True"/>
+            <TextBlock Text="Generate meta.json from info.toml" Grid.Row="2" Grid.Column="1" Foreground="White" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False"/>
+            <TextBlock Text="Download Window" Grid.Row="3" Grid.Column="1" Foreground="White" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False"/>
+            <TextBlock Text="Assignment Window" Grid.Row="4" Grid.Column="1" Foreground="White" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock Text="Devlog Priorities T>B" Grid.Row="0" Foreground="White" Grid.ColumnSpan="2" FontSize="25" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>
     </Grid>
 </Window>

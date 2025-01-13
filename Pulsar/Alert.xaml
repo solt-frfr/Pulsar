@@ -5,9 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pulsar"
         mc:Ignorable="d"
-        Title="Pulsar" Height="450" Width="800" MinHeight="450" MinWidth="800" 
+        Title="Pulsar" Height="auto" Width="800" MinWidth="800" ResizeMode="NoResize"
         Background="#000000" Icon="/Pulsar.png">
     <Grid>
-        <TextBlock Text="Balls" Name="AlertBlock" FontSize="75" FontWeight="Bold" Foreground="White"></TextBlock>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="ModName" Name="AlertBlock" FontSize="50" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+        <Image Name="Preview" Source="/Images/preview.png" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Center" Height="Auto" Grid.Row="1"/>
+        <TextBlock Text="Do you want to install?" Name="WhatBlock" FontSize="35" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2"></TextBlock>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Name="Cancel" Grid.Column="0" Click="Cancel_Click" Margin="75,20,75,20" FontSize="25">Cancel</Button>
+            <Button Name="Confirm" Grid.Column="1" Click="Confirm_Click" Margin="75,20,75,20" FontSize="25">Confirm</Button>
+        </Grid>
     </Grid>
 </Window>
