@@ -29,6 +29,7 @@ namespace Pulsar
         [JsonIgnore]
         public bool ArchiveImage { get; set; }
         public int InfoCat { get; set; }
+        public List<string> Tags { get; set; }
     }
     public class Settings
     {

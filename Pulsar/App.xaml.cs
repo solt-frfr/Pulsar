@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Policy;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,6 +39,7 @@ namespace Pulsar
         private string filelink;
         private List<string> fromhtml = new List<string>();
         private List<string> authors = new List<string>();
+        private bool cancel = false;
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -119,12 +121,27 @@ namespace Pulsar
                 {
                     foreach (var tag in anchorTags)
                     {
-                        string hrefValue = tag.GetAttributeValue("href", string.Empty);
-                        if (hrefValue.Contains("https://gamebanana.com/mods/cats/") && hrefValue != "")
+                        try
                         {
-                            fromhtml.Add(tag.InnerText);
+                            string hrefValue = tag.GetAttributeValue("href", string.Empty);
+                            if (hrefValue.Contains("https://gamebanana.com/mods/cats/") && hrefValue != "")
+                            {
+                                fromhtml.Add(tag.InnerText);
+                            }
+                        }
+                        catch
+                        {
+                            fromhtml.Add("");
                         }
                     }
+                }
+                if (fromhtml.Count == 2)
+                {
+                    fromhtml.Add("");
+                }
+                if (fromhtml.Count == 3)
+                {
+                    fromhtml.Add("");
                 }
                 anchorTags = htmlDoc.DocumentNode.SelectNodes("//meta[@property='og:description']");
                 if (anchorTags != null)
@@ -137,13 +154,13 @@ namespace Pulsar
                         if (hrefValue.Contains("submitted by "))
                         {
                             int startIndex = hrefValue.IndexOf("submitted by ") + 13;
-                            int endIndex = hrefValue.Length - 1;
+                            int endIndex = hrefValue.Length;
                             string auth = hrefValue.Substring(startIndex, endIndex - startIndex);
                             if (auth.Contains(" and ")) 
                             {
                                 authors.Add(auth.Substring(0, auth.IndexOf(" and ")));
                                 startIndex = auth.IndexOf(" and ") + 5;
-                                endIndex = auth.Length - 1;
+                                endIndex = auth.Length;
                                 authors.Add(auth.Substring(startIndex, endIndex - startIndex));
                             }
                             else
@@ -169,7 +186,8 @@ namespace Pulsar
                 aw.OnAlertHandled = async () =>
                 {
                     await Download(filelink);
-                    await Install1C();
+                    if (!cancel)
+                        await Install1C();
                 };
                 aw.Update(fromhtml[0], $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview");
                 aw.ShowDialog();
@@ -331,6 +349,7 @@ namespace Pulsar
                             if (moved == false)
                             {
                                 Directory.Delete(temppath, true);
+                                cancel = true;
                             }
                         }
                         else
@@ -348,6 +367,15 @@ namespace Pulsar
                     string prev = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview";
                     if (!System.IO.File.Exists(newpath + @"\preview.webp"))
                         await PreviewGet(prev, newpath);
+                    var jsonoptions = new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    };
+                    string jsonString = System.IO.File.ReadAllText(newpath + $@"\meta.json");
+                    Meta extmod = JsonSerializer.Deserialize<Meta>(jsonString, jsonoptions);
+                    extmod.ArchiveImage = true;
+                    MakePack finish = new MakePack(extmod);
+                    finish.ShowDialog();
                 }
                 if (System.IO.File.Exists(newpath + $@"\info.toml"))
                 {

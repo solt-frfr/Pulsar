@@ -33,7 +33,9 @@ namespace Pulsar
     {
         private Meta modmetadata = new Meta();
         private List<string> authors = new List<string>();
+        private List<string> tags = new List<string>();
         private List<System.Windows.Controls.TextBox> authorboxes = new List<System.Windows.Controls.TextBox>();
+        private List<System.Windows.Controls.TextBox> tagboxes = new List<System.Windows.Controls.TextBox>();
         public MakePack(Meta sender)
         {
             this.Topmost = true;
@@ -53,6 +55,7 @@ namespace Pulsar
                     IDBox.Text = sender.ID;
                     OpenButton.IsEnabled = !sender.ArchiveImage;
                     authors = sender.Authors;
+                    tags = sender.Tags;
                     InfoCategoryBox.SelectedIndex = sender.InfoCat;
                     try
                     {
@@ -62,6 +65,17 @@ namespace Pulsar
                         {
                             Add_Click(new object(), new RoutedEventArgs());
                             authorboxes[i].Text = authors[i];
+                        }
+                    }
+                    catch { }
+                    try
+                    {
+                        tagboxes.Add(TagBox0);
+                        tagboxes[0].Text = tags[0];
+                        for (int i = 1; i < tags.Count; i++)
+                        {
+                            AddTag_Click(new object(), new RoutedEventArgs());
+                            tagboxes[i].Text = tags[i];
                         }
                     }
                     catch { }
@@ -102,6 +116,7 @@ namespace Pulsar
             modmetadata.ID = IDBox.Text;
             modmetadata.Authors = new List<string>();
             modmetadata.InfoCat = InfoCategoryBox.SelectedIndex;
+            modmetadata.Tags = new List<string>();
             if (string.IsNullOrWhiteSpace(modmetadata.ID))
             {
                 AemulusModManager.Utilities.ParallelLogger.Log($"[ERROR] The ID was blank.");
@@ -113,7 +128,20 @@ namespace Pulsar
                 {
                     for (int i = 0; i < authorboxes.Count; i++)
                     {
-                        modmetadata.Authors.Add(authorboxes[i].Text);
+                        if (!string.IsNullOrWhiteSpace(authorboxes[i].Text))
+                            modmetadata.Authors.Add(authorboxes[i].Text);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AemulusModManager.Utilities.ParallelLogger.Log($"[ERROR] {ex}");
+                }
+                try
+                {
+                    for (int i = 0; i < tagboxes.Count; i++)
+                    {
+                        if (!string.IsNullOrWhiteSpace(tagboxes[i].Text))
+                            modmetadata.Tags.Add(tagboxes[i].Text);
                     }
                 }
                 catch (Exception ex)
@@ -167,6 +195,28 @@ namespace Pulsar
             catch { }
             TextBoxContainer.Children.Add(newTextBox);
             authorboxes.Add(newTextBox);
+            Height = Height + 30;
+        }
+        private void AddTag_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Controls.TextBox newTextBox = new System.Windows.Controls.TextBox
+            {
+                Name = $"TagBox{tagboxes.Count}",
+                Height = 20,
+                Width = 179,
+                Margin = new Thickness(5),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Background = (SolidColorBrush)new BrushConverter().ConvertFromString("#a10943"),
+                Foreground = (SolidColorBrush)new BrushConverter().ConvertFromString("#ffd9da"),
+            };
+            try
+            {
+                newTextBox.Text = tags[tagboxes.Count];
+            }
+            catch { }
+            TagBoxContainer.Children.Add(newTextBox);
+            tagboxes.Add(newTextBox);
             Height = Height + 30;
         }
 

@@ -84,11 +84,13 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Foreground="#e8feff" HorizontalAlignment="Center" Text="Sort by..." VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold"/>
                 <ComboBox Margin="10,3,10,3" Name="Sort" Grid.Row="0" Grid.Column="1" SelectionChanged="Sort_SelectionChanged"></ComboBox>
                 <ComboBox Margin="10,3,10,3" Name="Sort2" Grid.Row="0" Grid.Column="2" SelectionChanged="Sort2_SelectionChanged"></ComboBox>
-                <TextBox Margin="10,3,10,3" Name="Search" Grid.Row="0" Grid.Column="3" GotFocus="Search_GotFocus" PreviewMouseLeftButtonDown="Search_PreviewMouseLeftButtonDown" Text="Search..." TextChanged="Search_TextChanged"/>
+                <ComboBox Margin="10,3,10,3" Name="Sort3" Grid.Row="0" Grid.Column="3" SelectionChanged="Sort3_SelectionChanged"></ComboBox>
+                <TextBox Margin="10,3,10,3" Name="Search" Grid.Row="0" Grid.Column="4" GotFocus="Search_GotFocus" PreviewMouseLeftButtonDown="Search_PreviewMouseLeftButtonDown" Text="Search..." TextChanged="Search_TextChanged"/>
             </Grid>
         </Grid>
         <Grid Grid.RowSpan="2" Grid.Column="1" Name="ModContent" Visibility="Visible" Margin="10,10,10,0">

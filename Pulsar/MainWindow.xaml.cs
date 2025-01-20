@@ -136,6 +136,8 @@ namespace Pulsar
             Sort.Items.Add("---");
             Sort2.Items.Clear();
             Sort2.Items.Add("---");
+            Sort3.Items.Clear();
+            Sort3.Items.Add("---");
             string path = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
             string[] griditems = CountFolders(path);
             foreach (string modpath in griditems)
@@ -182,6 +184,14 @@ namespace Pulsar
                             Sort.Items.Add(mod.Type);
                         if (!Sort2.Items.Contains(mod.Category) && !string.IsNullOrEmpty(mod.Category))
                             Sort2.Items.Add(mod.Category);
+                        if (mod.Tags != null)
+                        {
+                            for (int i = 0; i < mod.Tags.Count; i++)
+                            {
+                                if (!Sort3.Items.Contains(mod.Tags[i]) && !string.IsNullOrEmpty(mod.Tags[i]))
+                                    Sort3.Items.Add(mod.Tags[i]);
+                            }
+                        }
                     }
                     else
                         ParallelLogger.Log($"[ERROR] Folder and ID mismatch. Mod ''{mod.Name}'' will not be used.");
@@ -208,6 +218,7 @@ namespace Pulsar
             Search.Text = "Search...";
             Sort.SelectedIndex = 0;
             Sort2.SelectedIndex = 0;
+            Sort3.SelectedIndex = 0;
             ModDataGrid.Items.Refresh();
         }
         static void CopyDirectory(string sourceDir, string destinationDir, bool overwrite = true)
@@ -298,6 +309,16 @@ namespace Pulsar
                         try
                         {
                             CopyDirectory($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}", $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp\{row.ID}\{row.Name}", true);
+
+                            var jsonoptions = new JsonSerializerOptions
+                            {
+                                WriteIndented = true
+                            };
+                            row.Tags.Clear();
+                            string jsonString = JsonSerializer.Serialize(row, jsonoptions);
+                            string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp\{row.ID}\{row.Name}" + $@"\meta.json";
+                            System.IO.File.WriteAllText(filepath, jsonString);
+
                             SevenZipCompressor.SetLibraryPath($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\x86\7z.dll");
                             SevenZipCompressor zcompressor = new SevenZipCompressor
                             {
@@ -331,6 +352,7 @@ namespace Pulsar
                     }
                 }
             }
+            Refresh();
         }
 
         private void Delete_OnClick(object sender, RoutedEventArgs e)
@@ -1058,12 +1080,24 @@ namespace Pulsar
                             && (Sort.SelectedItem.Equals(mod.Type) || Sort.SelectedItem.Equals("---"))
                             && (Sort2.SelectedItem.Equals(mod.Category) || Sort2.SelectedItem.Equals("---")))
                         {
-                            if (enabledmods.Contains(mod.ID))
-                                mod.IsChecked = true;
+                            if (mod.Tags == null || mod.Tags.Count == 0)
+                            {
+                                if (Sort3.SelectedItem.Equals("---"))
+                                {
+                                    mod.IsChecked = enabledmods.Contains(mod.ID);
+                                    mod.LinkImage = CreateLinkImage(mod.Link);
+                                    ModDataGrid.Items.Add(mod);
+                                }
+                            }
                             else
-                                mod.IsChecked = false;
-                            mod.LinkImage = CreateLinkImage(mod.Link);
-                            ModDataGrid.Items.Add(mod);
+                            {
+                                if (mod.Tags.Any(tag => object.Equals(Sort3.SelectedItem, tag) || object.Equals(Sort3.SelectedItem, "---")))
+                                {
+                                    mod.IsChecked = enabledmods.Contains(mod.ID);
+                                    mod.LinkImage = CreateLinkImage(mod.Link);
+                                    ModDataGrid.Items.Add(mod);
+                                }
+                            }
                         }
                     }
                 }
@@ -1078,6 +1112,10 @@ namespace Pulsar
         }
 
         private void Sort2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Search_TextChanged(sender, null);
+        }
+        private void Sort3_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Search_TextChanged(sender, null);
         }
@@ -1209,7 +1247,16 @@ namespace Pulsar
                 }
                 if (System.IO.File.Exists(newpath + $@"\meta.json"))
                 {
-
+                    var jsonoptions = new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    };
+                    string jsonString = System.IO.File.ReadAllText(newpath + $@"\meta.json");
+                    Meta extmod = JsonSerializer.Deserialize<Meta>(jsonString, jsonoptions);
+                    if (System.IO.File.Exists(newpath + $@"\preview.webp"))
+                        extmod.ArchiveImage = true;
+                    MakePack finish = new MakePack(extmod);
+                    finish.ShowDialog();
                 }
                 if (System.IO.File.Exists(newpath + $@"\info.toml"))
                 {

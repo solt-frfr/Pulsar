@@ -1,6 +1,8 @@
 # Pulsar
  A successor to Super Smash Bros. Ultimate's mod manager Quasar, written in C# and Visual Studio.
 
+ An important note: Tags are for users to define. Tags will be cleared when zipping a mod.
+
 ## Current Features
 
 ### Toggleable Tabs.
@@ -26,7 +28,8 @@
 
 ### Package Zipper using 7z.
 
-### Search/Sort Installed Mods.
+### Search/Sort Installed Mods
+ Additional sorting can be done through user-defined tags. These can be created when editing metadata.
 
 ### File Conflict Management.
 
