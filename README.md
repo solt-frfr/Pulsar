@@ -15,8 +15,6 @@
 
  ~~Download~~
 
-### One instance only.
-
 ### Full One-Click install functionality.
 
 ### Built-in Logging and Console.
@@ -28,7 +26,9 @@
 
 ### Package Zipper using 7z.
 
-### Search/Sort Installed Mods
+### Search/Sort Installed Mods.
+
+### File Conflict Management.
 
 # Credits
 ## [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager)
