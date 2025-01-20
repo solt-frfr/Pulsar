@@ -188,6 +188,8 @@ namespace Pulsar
                     await Download(filelink);
                     if (!cancel)
                         await Install1C();
+                    else
+                        return;
                 };
                 aw.Update(fromhtml[0], $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview");
                 aw.ShowDialog();
@@ -362,6 +364,8 @@ namespace Pulsar
                         ParallelLogger.Log($@"[ERROR] {ex.Message}");
                     }
                 }
+                if (cancel)
+                    return;
                 if (System.IO.File.Exists(newpath + $@"\meta.json"))
                 {
                     string prev = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview";

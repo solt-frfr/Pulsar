@@ -36,6 +36,7 @@ namespace Pulsar
         private List<string> tags = new List<string>();
         private List<System.Windows.Controls.TextBox> authorboxes = new List<System.Windows.Controls.TextBox>();
         private List<System.Windows.Controls.TextBox> tagboxes = new List<System.Windows.Controls.TextBox>();
+        private bool UserID = false;
         public MakePack(Meta sender)
         {
             this.Topmost = true;
@@ -53,6 +54,11 @@ namespace Pulsar
                     VersionBox.Text = sender.Version;
                     LinkBox.Text = sender.Link;
                     IDBox.Text = sender.ID;
+                    if (!string.IsNullOrWhiteSpace(sender.ID))
+                    {
+                        IDBox.IsEnabled = false;
+                        UserID = true;
+                    }
                     OpenButton.IsEnabled = !sender.ArchiveImage;
                     authors = sender.Authors;
                     tags = sender.Tags;
@@ -88,7 +94,6 @@ namespace Pulsar
             if (!authorboxes.Contains(AuthorBox0))
                 authorboxes.Add(AuthorBox0);
         }
-        private bool UserID = false;
         private void Open_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.OpenFileDialog openPng = new System.Windows.Forms.OpenFileDialog();
