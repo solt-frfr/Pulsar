@@ -66,7 +66,7 @@
             <Button Name="OpenButton" Click="Open_Click">Open</Button>
             <TextBox Name="PreviewBox" ToolTip="Encoding may take a moment if including a preview." IsReadOnly="True" Grid.Column="1" Grid.Row="6" Foreground="#ffd9da" Background="#a10943"/>
         </Grid>
-        <CheckBox Name="OverrideBox" ToolTip="If checked, it will generate its own info.toml to be used in Arcopolis' mod manager ingame." Grid.Column="0" Grid.Row="10" Foreground="#ffd9da" Background="#a10943" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <CheckBox Name="OverrideBox" ToolTip="If checked, it will generate its own info.toml to be used in Arcopolis' mod manager ingame." Grid.Column="0" Grid.Row="10" Foreground="#ffd9da" Background="#a10943" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="True"/>
         <ComboBox Name="InfoCategoryBox" ToolTip="The ''category'' used for Arcopolis' mod manager's info.toml" Grid.Column="0" Grid.Row="11" Margin="5">
             <ComboBoxItem IsSelected="True" Content="Fighter"/>
             <ComboBoxItem Content="Stage"/>

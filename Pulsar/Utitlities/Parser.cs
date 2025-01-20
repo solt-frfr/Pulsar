@@ -17,7 +17,6 @@ namespace Pulsar.Utilities
         public static Meta InfoTOML(string filepath)
         {
             Meta regenerated = new Meta();
-            filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\knuckles_over_little_mac_c01_d502d\info.toml";
             if (Path.GetExtension(filepath) == ".toml")
             {
                 string[] fileContent = File.ReadAllLines(filepath);
@@ -26,21 +25,27 @@ namespace Pulsar.Utilities
                 int endIndex = 0;
                 for (int i = 0; i < lines; i++)
                 {
-                    if (fileContent[i].Contains("display_name = \""))
+                    if (fileContent[i].StartsWith("display_name"))
                     {
-                        startIndex = fileContent[i].IndexOf("display_name = \"") + 16;
+                        startIndex = fileContent[i].IndexOf("\"") + 1;
                         endIndex = fileContent[i].IndexOf("\"", startIndex);
                         regenerated.Name = fileContent[i].Substring(startIndex, endIndex - startIndex);
                     }
-                    if (fileContent[i].Contains("authors = \""))
+                    if (fileContent[i].StartsWith("authors"))
                     {
-                        int authorcount = fileContent[1].Split(',').Length;
+                        int authorcount = fileContent[i].Split(',').Length;
                         regenerated.Authors = new List<string>();
                         for (int ii = 1; ii <= authorcount; ii++)
                         {
-                            if (ii == 1)
+                            if (ii == 1 && ii == authorcount)
                             {
-                                startIndex = fileContent[i].IndexOf("authors = \"") + 11;
+                                startIndex = fileContent[i].IndexOf("\"") + 1;
+                                endIndex = fileContent[i].IndexOf("\"", startIndex);
+                                regenerated.Authors.Add(fileContent[i].Substring(startIndex, endIndex - startIndex));
+                            }
+                            else if (ii == 1)
+                            {
+                                startIndex = fileContent[i].IndexOf("\"") + 1;
                                 endIndex = fileContent[i].IndexOf(",", startIndex);
                                 regenerated.Authors.Add(fileContent[i].Substring(startIndex, endIndex - startIndex));
                             }
@@ -58,13 +63,13 @@ namespace Pulsar.Utilities
                             }
                         }
                     }
-                    if (fileContent[i].Contains("version = \""))
+                    if (fileContent[i].StartsWith("version"))
                     {
-                        startIndex = fileContent[i].IndexOf("version = \"") + 11;
+                        startIndex = fileContent[i].IndexOf("\"") + 1;
                         endIndex = fileContent[i].IndexOf("\"", startIndex);
                         regenerated.Version = fileContent[i].Substring(startIndex, endIndex - startIndex);
                     }
-                    if (fileContent[i].Contains("description = \"\"\""))
+                    if (fileContent[i].StartsWith("description"))
                     {
                         regenerated.Description = "";
                         for (int ii = i + 1; fileContent[ii] != "\"\"\""; ii++)
@@ -76,7 +81,7 @@ namespace Pulsar.Utilities
                             }
                         }
                     }
-                    if (fileContent[i].Contains("category = \""))
+                    if (fileContent[i].StartsWith("category"))
                     {
                         regenerated.InfoCat = MakePack.InfoCatEnum(fileContent[i]);
                     }

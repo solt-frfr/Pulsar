@@ -9,7 +9,7 @@
 
  Mods
 
- ~~Assign~~
+ Assign
 
  Settings
 
@@ -17,7 +17,7 @@
 
 ### One instance only.
 
-### Shows an alert when opened through a URL.
+### Full One-Click install functionality.
 
 ### Built-in Logging and Console.
 
@@ -35,4 +35,15 @@
  Aemulus' Parallel Logging feature was used, and is a huge inspiration for this project.
 
 ## [Quasar](https://github.com/Mowjoh/Quasar)
- Quasar, the origianl SSBU mod manager. I looked at their code to find what the assign menu exactly did.
+ Quasar, the origianl SSBU mod manager. I tried looking at its code but none of it made sense to me. Their logo is used for one of the default previews.
+
+## [83](https://www.youtube.com/watch?v=e1xCOsgWG0M)
+ They drew the Hatsune Miku image used in one of the default previews.
+
+## [oceanstuck](https://github.com/oceanstuck)
+ Based person who gave me the name for this.
+
+## [Atmosphere-NX](https://github.com/Atmosphere-NX/Atmosphere)
+ CFW for the Nintendo Switch. Their background is used for one of the default previews.
+
+## Should any one of these people wish for me to remove their work from my project, I will happily oblige.

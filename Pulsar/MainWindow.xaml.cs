@@ -30,6 +30,11 @@ using System.Windows.Shell;
 using System.Runtime;
 using System.Security.Policy;
 using Pulsar.Utilities;
+using Pulsar.Utitlities;
+using System.Runtime.Remoting.Messaging;
+using static System.Net.WebRequestMethods;
+using System.Net.Http;
+using static System.Windows.Forms.LinkLabel;
 
 namespace Pulsar
 {
@@ -41,6 +46,8 @@ namespace Pulsar
         private StreamWriter sw;
         private TextBoxOutputter outputter;
         private List<string> enabledmods = new List<string>();
+        private List<System.Windows.Controls.ComboBox> assignboxes = new List<System.Windows.Controls.ComboBox>();
+        private bool isInitialized = false;
 
         public MainWindow(bool running, bool oneClick)
         {
@@ -63,7 +70,17 @@ namespace Pulsar
             outputter.WriteEvent += consoleWriter_WriteEvent;
             outputter.WriteLineEvent += consoleWriter_WriteLineEvent;
             Console.SetOut(outputter);
+            assignboxes.Add(ChangeBox1);
+            assignboxes.Add(ChangeBox2);
+            assignboxes.Add(ChangeBox3);
+            assignboxes.Add(ChangeBox4);
+            assignboxes.Add(ChangeBox5);
+            assignboxes.Add(ChangeBox6);
+            assignboxes.Add(ChangeBox7);
+            assignboxes.Add(ChangeBox8);
+            AssignHideAll(true);
             Refresh();
+            isInitialized = true;
         }
         private string[] CountFolders(string folderPath)
         {
@@ -125,7 +142,7 @@ namespace Pulsar
             {
                 Meta mod = new Meta();
                 string filepath = modpath + $@"\meta.json";
-                if (!File.Exists(filepath))
+                if (!System.IO.File.Exists(filepath))
                 {
                     string genid = modpath.Replace(path, "");
                     mod.Name = mod.ID = genid = genid.TrimStart('\\');
@@ -135,15 +152,23 @@ namespace Pulsar
                         WriteIndented = true
                     };
                     string jsonString = JsonSerializer.Serialize(mod, jsonoptions);
-                    File.WriteAllText(filepath, jsonString);
+                    System.IO.File.WriteAllText(filepath, jsonString);
                 }
-                if (File.Exists(filepath))
+                if (!System.IO.File.Exists(modpath + $@"\files.json"))
+                {
+                    PathManagement.GatherFiles(modpath);
+                }
+                if (!System.IO.File.Exists(modpath + $@"\deploy.json"))
+                {
+                    System.IO.File.Copy(modpath + $@"\files.json", modpath + $@"\deploy.json");
+                }
+                if (System.IO.File.Exists(filepath))
                 {
                     var jsonoptions = new JsonSerializerOptions
                     {
                         WriteIndented = true
                     };
-                    string jsonString = File.ReadAllText(filepath);
+                    string jsonString = System.IO.File.ReadAllText(filepath);
                     mod = JsonSerializer.Deserialize<Meta>(jsonString, jsonoptions);
                     if ((path + $@"\{mod.ID}" == modpath) && !ModDataGrid.Items.Contains(mod))
                     {
@@ -166,15 +191,17 @@ namespace Pulsar
             }
             Settings settings = new Settings();
             string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
-            if (File.Exists(settingspath))
+            if (System.IO.File.Exists(settingspath))
             {
                 var jsonoptions = new JsonSerializerOptions
                 {
                     WriteIndented = true
                 };
-                string jsonString = File.ReadAllText(settingspath);
+                string jsonString = System.IO.File.ReadAllText(settingspath);
                 settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
                 PathBox.Text = settings.DeployPath;
+                DefPrevBox.SelectedIndex = settings.DefaultImage;
+                Preview.Source = new BitmapImage(new Uri($"/Images/Preview{DefPrevBox.SelectedIndex}.png", UriKind.Relative));
             }
             ParallelLogger.Log($"[INFO] Refreshed mods.");
             ParallelLogger.Log($"[INFO] Refreshed settings.");
@@ -192,7 +219,7 @@ namespace Pulsar
             {
                 string fileName = System.IO.Path.GetFileName(file);
                 string destFilePath = System.IO.Path.Combine(destinationDir, fileName);
-                File.Copy(file, destFilePath, overwrite);
+                System.IO.File.Copy(file, destFilePath, overwrite);
             }
             foreach (string subDir in Directory.GetDirectories(sourceDir))
             {
@@ -208,7 +235,7 @@ namespace Pulsar
         private void New_OnClick(object sender, RoutedEventArgs e)
         {
             MakePack newpack = new MakePack(new Meta());
-            Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
+            Preview.Source = new BitmapImage(new Uri($"/Images/Preview{DefPrevBox.SelectedIndex}.png", UriKind.Relative));
             newpack.ShowDialog();
             Refresh();
         }
@@ -217,7 +244,7 @@ namespace Pulsar
         {
             Meta row = (Meta)ModDataGrid.SelectedItem;
             MakePack edit = new MakePack(row);
-            Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
+            Preview.Source = new BitmapImage(new Uri($"/Images/Preview{DefPrevBox.SelectedIndex}.png", UriKind.Relative));
             try
             {
                 edit.ShowDialog();
@@ -254,7 +281,9 @@ namespace Pulsar
 
         private void Assign_OnClick(object sender, RoutedEventArgs e)
         {
-
+            AssignHideAll(true);
+            DetectSlots();
+            Assign_Click(null, null);
         }
 
         private void Zip_OnClick(object sender, RoutedEventArgs e)
@@ -361,7 +390,7 @@ namespace Pulsar
             }
             try
             {
-                if (File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\preview.webp"))
+                if (System.IO.File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\preview.webp"))
                 {
                     BitmapImage bitmap = new BitmapImage();
                     using (FileStream fs = new FileStream($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\preview.webp", FileMode.Open, FileAccess.Read))
@@ -375,12 +404,12 @@ namespace Pulsar
                 }
                 else
                 {
-                    Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
+                    Preview.Source = new BitmapImage(new Uri($"/Images/Preview{DefPrevBox.SelectedIndex}.png", UriKind.Relative));
                 }
             }
             catch
             {
-                Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
+                Preview.Source = new BitmapImage(new Uri($"/Images/Preview{DefPrevBox.SelectedIndex}.png", UriKind.Relative));
             }
         }
 
@@ -466,8 +495,361 @@ namespace Pulsar
             DownloadWindow.Visibility = Visibility.Collapsed;
         }
 
+        private void DetectSlots()
+        {
+            List<string> files = new List<string>();
+            List<string> deployfiles = new List<string>();
+            foreach (var item in ModDataGrid.SelectedItems)
+            {
+                Meta row = (Meta)item;
+                if (row != null)
+                {
+                    if (System.IO.File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\files.json"))
+                    {
+                        try
+                        {
+                            files = QuickJson(false, null, $@"Mods\{row.ID}\files.json");
+                            if (System.IO.File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\deploy.json"))
+                            {
+                                deployfiles = QuickJson(false, null, $@"Mods\{row.ID}\deploy.json");
+                            }
+                            else
+                            {
+                                deployfiles = files;
+                            }
+                            bool hasassign = false;
+                            for (int i = 0; i < files.Count; i++)
+                            {
+                                for (int ii = 0; ii <= 7; ii++)
+                                {
+                                    if (files[i].Contains("\\ui\\replace\\chara\\") && files[i].Contains($"0{ii}.bntx"))
+                                    {
+                                        for (int iii = 0; iii <= 7; iii++)
+                                        {
+                                            if (deployfiles[i].Contains("\\ui\\replace\\chara\\") && deployfiles[i].Contains($"0{iii}.bntx"))
+                                            {
+                                                Sub(ii, false);
+                                                assignboxes[ii].SelectedIndex = iii;
+                                                Sub(ii, true);
+                                            }
+                                        }
+                                        AssignHide(ii + 1, false);
+                                        hasassign = true;
+                                    }
+                                    if (files[i].Contains($"c0{ii}"))
+                                    {
+                                        for (int iii = 0; iii <= 7; iii++)
+                                        {
+                                            if (deployfiles[i].Contains($"c0{iii}"))
+                                            {
+                                                Sub(ii, false);
+                                                assignboxes[ii].SelectedIndex = iii;
+                                                Sub(ii, true);
+                                            }
+                                        }
+                                        AssignHide(ii + 1, false);
+                                        hasassign = true;
+                                    }
+                                }
+                            }
+                            if (hasassign)
+                            {
+                                ModName1.Text = row.Name;
+                                TypeName1.Text = row.Type;
+                                CatName1.Text = row.Category;
+                                ModName2.Text = row.Name;
+                                TypeName2.Text = row.Type;
+                                CatName2.Text = row.Category;
+                                ModName3.Text = row.Name;
+                                TypeName3.Text = row.Type;
+                                CatName3.Text = row.Category;
+                                ModName4.Text = row.Name;
+                                TypeName4.Text = row.Type;
+                                CatName4.Text = row.Category;
+                                ModName5.Text = row.Name;
+                                TypeName5.Text = row.Type;
+                                CatName5.Text = row.Category;
+                                ModName6.Text = row.Name;
+                                TypeName6.Text = row.Type;
+                                CatName6.Text = row.Category;
+                                ModName7.Text = row.Name;
+                                TypeName7.Text = row.Type;
+                                CatName7.Text = row.Category;
+                                ModName8.Text = row.Name;
+                                TypeName8.Text = row.Type;
+                                CatName8.Text = row.Category;
+                                ModID0.Text = row.ID;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ParallelLogger.Log($@"[ERROR] Couldn't open \Mods\{row.ID} ({ex.Message})");
+                        }
+                    }
+                }
+            }
+        }
+        private void Sub(int sender, bool yes)
+        {
+            if ((sender == 0) && yes)
+            {
+                ChangeBox1.SelectionChanged += ChangeBox1_SelectionChanged;
+            }
+            else if ((sender == 1) && yes)
+            {
+                ChangeBox2.SelectionChanged += ChangeBox2_SelectionChanged;
+            }
+            else if ((sender == 2) && yes)
+            {
+                ChangeBox3.SelectionChanged += ChangeBox3_SelectionChanged;
+            }
+            else if ((sender == 3) && yes)
+            {
+                ChangeBox4.SelectionChanged += ChangeBox4_SelectionChanged;
+            }
+            else if ((sender == 4) && yes)
+            {
+                ChangeBox5.SelectionChanged += ChangeBox5_SelectionChanged;
+            }
+            else if ((sender == 5) && yes)
+            {
+                ChangeBox6.SelectionChanged += ChangeBox6_SelectionChanged;
+            }
+            else if ((sender == 6) && yes)
+            {
+                ChangeBox7.SelectionChanged += ChangeBox7_SelectionChanged;
+            }
+            else if ((sender == 7) && yes)
+            {
+                ChangeBox8.SelectionChanged += ChangeBox8_SelectionChanged;
+            }
+            else if ((sender == 0) && yes == false)
+            {
+                ChangeBox1.SelectionChanged -= ChangeBox1_SelectionChanged;
+            }
+            else if ((sender == 1) && yes == false)
+            {
+                ChangeBox2.SelectionChanged -= ChangeBox2_SelectionChanged;
+            }
+            else if ((sender == 2) && yes == false)
+            {
+                ChangeBox3.SelectionChanged -= ChangeBox3_SelectionChanged;
+            }
+            else if ((sender == 3) && yes == false)
+            {
+                ChangeBox4.SelectionChanged -= ChangeBox4_SelectionChanged;
+            }
+            else if ((sender == 4) && yes == false)
+            {
+                ChangeBox5.SelectionChanged -= ChangeBox5_SelectionChanged;
+            }
+            else if ((sender == 5) && yes == false)
+            {
+                ChangeBox6.SelectionChanged -= ChangeBox6_SelectionChanged;
+            }
+            else if ((sender == 6) && yes == false)
+            {
+                ChangeBox7.SelectionChanged -= ChangeBox7_SelectionChanged;
+            }
+            else if ((sender == 7) && yes == false)
+            {
+                ChangeBox8.SelectionChanged -= ChangeBox8_SelectionChanged;
+            }
+        }
+
+        private void AssignHide(int sender, bool hide)
+        {
+            if ((sender == 1) && hide)
+            {
+                ModName1.Visibility = Visibility.Collapsed;
+                TypeName1.Visibility = Visibility.Collapsed;
+                CatName1.Visibility = Visibility.Collapsed;
+                Origin1.Visibility = Visibility.Collapsed;
+                Change1.Visibility = Visibility.Collapsed;
+                ChangeBox1.Visibility = Visibility.Collapsed;
+                ChangeBox1.SelectionChanged -= ChangeBox1_SelectionChanged;
+                ChangeBox1.SelectedIndex = 0;
+                ChangeBox1.SelectionChanged += ChangeBox1_SelectionChanged;
+            }
+            else if ((sender == 2) && hide)
+            {
+                ModName2.Visibility = Visibility.Collapsed;
+                TypeName2.Visibility = Visibility.Collapsed;
+                CatName2.Visibility = Visibility.Collapsed;
+                Origin2.Visibility = Visibility.Collapsed;
+                Change2.Visibility = Visibility.Collapsed;
+                ChangeBox2.Visibility = Visibility.Collapsed;
+                ChangeBox2.SelectionChanged -= ChangeBox2_SelectionChanged;
+                ChangeBox2.SelectedIndex = 1;
+                ChangeBox2.SelectionChanged += ChangeBox2_SelectionChanged;
+            }
+            else if ((sender == 3) && hide)
+            {
+                ModName3.Visibility = Visibility.Collapsed;
+                TypeName3.Visibility = Visibility.Collapsed;
+                CatName3.Visibility = Visibility.Collapsed;
+                Origin3.Visibility = Visibility.Collapsed;
+                Change3.Visibility = Visibility.Collapsed;
+                ChangeBox3.Visibility = Visibility.Collapsed;
+                ChangeBox3.SelectionChanged -= ChangeBox3_SelectionChanged;
+                ChangeBox3.SelectedIndex = 2;
+                ChangeBox3.SelectionChanged += ChangeBox3_SelectionChanged;
+            }
+            else if ((sender == 4) && hide)
+            {
+                ModName4.Visibility = Visibility.Collapsed;
+                TypeName4.Visibility = Visibility.Collapsed;
+                CatName4.Visibility = Visibility.Collapsed;
+                Origin4.Visibility = Visibility.Collapsed;
+                Change4.Visibility = Visibility.Collapsed;
+                ChangeBox4.Visibility = Visibility.Collapsed;
+                ChangeBox4.SelectionChanged -= ChangeBox4_SelectionChanged;
+                ChangeBox4.SelectedIndex = 3;
+                ChangeBox4.SelectionChanged += ChangeBox4_SelectionChanged;
+            }
+            else if ((sender == 5) && hide)
+            {
+                ModName5.Visibility = Visibility.Collapsed;
+                TypeName5.Visibility = Visibility.Collapsed;
+                CatName5.Visibility = Visibility.Collapsed;
+                Origin5.Visibility = Visibility.Collapsed;
+                Change5.Visibility = Visibility.Collapsed;
+                ChangeBox5.Visibility = Visibility.Collapsed;
+                ChangeBox5.SelectionChanged -= ChangeBox5_SelectionChanged;
+                ChangeBox5.SelectedIndex = 4;
+                ChangeBox5.SelectionChanged += ChangeBox5_SelectionChanged;
+            }
+            else if ((sender == 6) && hide)
+            {
+                ModName6.Visibility = Visibility.Collapsed;
+                TypeName6.Visibility = Visibility.Collapsed;
+                CatName6.Visibility = Visibility.Collapsed;
+                Origin6.Visibility = Visibility.Collapsed;
+                Change6.Visibility = Visibility.Collapsed;
+                ChangeBox6.Visibility = Visibility.Collapsed;
+                ChangeBox6.SelectionChanged -= ChangeBox6_SelectionChanged;
+                ChangeBox6.SelectedIndex = 5;
+                ChangeBox6.SelectionChanged += ChangeBox6_SelectionChanged;
+            }
+            else if ((sender == 7) && hide)
+            {
+                ModName7.Visibility = Visibility.Collapsed;
+                TypeName7.Visibility = Visibility.Collapsed;
+                CatName7.Visibility = Visibility.Collapsed;
+                Origin7.Visibility = Visibility.Collapsed;
+                Change7.Visibility = Visibility.Collapsed;
+                ChangeBox7.Visibility = Visibility.Collapsed;
+                ChangeBox7.SelectionChanged -= ChangeBox7_SelectionChanged;
+                ChangeBox7.SelectedIndex = 6;
+                ChangeBox7.SelectionChanged += ChangeBox7_SelectionChanged;
+            }
+            else if ((sender == 8) && hide)
+            {
+                ModName8.Visibility = Visibility.Collapsed;
+                TypeName8.Visibility = Visibility.Collapsed;
+                CatName8.Visibility = Visibility.Collapsed;
+                Origin8.Visibility = Visibility.Collapsed;
+                Change8.Visibility = Visibility.Collapsed;
+                ChangeBox8.Visibility = Visibility.Collapsed;
+                ChangeBox8.SelectionChanged -= ChangeBox8_SelectionChanged;
+                ChangeBox8.SelectedIndex = 7;
+                ChangeBox8.SelectionChanged += ChangeBox8_SelectionChanged;
+            }
+            else if ((sender == 1) && hide == false)
+            {
+                ModName1.Visibility = Visibility.Visible;
+                TypeName1.Visibility = Visibility.Visible;
+                CatName1.Visibility = Visibility.Visible;
+                Origin1.Visibility = Visibility.Visible;
+                Change1.Visibility = Visibility.Visible;
+                ChangeBox1.Visibility = Visibility.Visible;
+            }
+            else if ((sender == 2) && hide == false)
+            {
+                ModName2.Visibility = Visibility.Visible;
+                TypeName2.Visibility = Visibility.Visible;
+                CatName2.Visibility = Visibility.Visible;
+                Origin2.Visibility = Visibility.Visible;
+                Change2.Visibility = Visibility.Visible;
+                ChangeBox2.Visibility = Visibility.Visible;
+            }
+            else if ((sender == 3) && hide == false)
+            {
+                ModName3.Visibility = Visibility.Visible;
+                TypeName3.Visibility = Visibility.Visible;
+                CatName3.Visibility = Visibility.Visible;
+                Origin3.Visibility = Visibility.Visible;
+                Change3.Visibility = Visibility.Visible;
+                ChangeBox3.Visibility = Visibility.Visible;
+            }
+            else if ((sender == 4) && hide == false)
+            {
+                ModName4.Visibility = Visibility.Visible;
+                TypeName4.Visibility = Visibility.Visible;
+                CatName4.Visibility = Visibility.Visible;
+                Origin4.Visibility = Visibility.Visible;
+                Change4.Visibility = Visibility.Visible;
+                ChangeBox4.Visibility = Visibility.Visible;
+            }
+            else if ((sender == 5) && hide == false)
+            {
+                ModName5.Visibility = Visibility.Visible;
+                TypeName5.Visibility = Visibility.Visible;
+                CatName5.Visibility = Visibility.Visible;
+                Origin5.Visibility = Visibility.Visible;
+                Change5.Visibility = Visibility.Visible;
+                ChangeBox5.Visibility = Visibility.Visible;
+            }
+            else if ((sender == 6) && hide == false)
+            {
+                ModName6.Visibility = Visibility.Visible;
+                TypeName6.Visibility = Visibility.Visible;
+                CatName6.Visibility = Visibility.Visible;
+                Origin6.Visibility = Visibility.Visible;
+                Change6.Visibility = Visibility.Visible;
+                ChangeBox6.Visibility = Visibility.Visible;
+            }
+            else if ((sender == 7) && hide == false)
+            {
+                ModName7.Visibility = Visibility.Visible;
+                TypeName7.Visibility = Visibility.Visible;
+                CatName7.Visibility = Visibility.Visible;
+                Origin7.Visibility = Visibility.Visible;
+                Change7.Visibility = Visibility.Visible;
+                ChangeBox7.Visibility = Visibility.Visible;
+            }
+            else if ((sender == 8) && hide == false)
+            {
+                ModName8.Visibility = Visibility.Visible;
+                TypeName8.Visibility = Visibility.Visible;
+                CatName8.Visibility = Visibility.Visible;
+                Origin8.Visibility = Visibility.Visible;
+                Change8.Visibility = Visibility.Visible;
+                ChangeBox8.Visibility = Visibility.Visible;
+            }
+        }
+        private void AssignHideAll(bool hide)
+        {
+            for (int i = 1; i <= 8; i++)
+            {
+                if (hide)
+                {
+                    AssignHide(i, true);
+                }
+                else
+                {
+                    AssignHide(i, false);
+                }
+            }
+        }
+        // I'd really like to make this work, but it'd take a lot of time.
+        // If you're looking at the source code, that's great!
+        // I'll make a window eventually, but it'd take a lot of time that I don't have, so use 1-Click for now.
+
         private void Download_Click(object sender, RoutedEventArgs e)
         {
+            // Original function:
+            /*
             var modsImage = (Image)ModsButton.Template.FindName("ModsImage", ModsButton);
             if (modsImage != null)
             {
@@ -492,6 +874,19 @@ namespace Pulsar
             SettingsWindow.Visibility = Visibility.Collapsed;
             AssignWindow.Visibility = Visibility.Collapsed;
             DownloadWindow.Visibility = Visibility.Visible;
+            */
+            try
+            {
+                System.Diagnostics.Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://gamebanana.com/games/6498",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ParallelLogger.Log($"[ERROR] Failed to open link: {ex.Message}");
+            }
         }
         void consoleWriter_WriteLineEvent(object sender, ConsoleWriterEventArgs e)
         {
@@ -523,33 +918,46 @@ namespace Pulsar
         private void Deploy_Click(object sender, RoutedEventArgs e)
         {
             string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
-            string jsonString = File.ReadAllText(settingspath);
+            string jsonString = System.IO.File.ReadAllText(settingspath);
             var jsonoptions = new JsonSerializerOptions
             {
                 WriteIndented = true
             };
             Settings settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
-            foreach (string ID in enabledmods)
+            DefPrevBox.SelectedIndex = settings.DefaultImage;
+
+            Alert aw = new Alert($@"This will delete all files inside {settings.DeployPath}. Is this okay?", false);
+            aw.OnAlertHandled = () =>
             {
-                string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
-                string destinationDir = settings.DeployPath + $@"\" + ID;
-                if (!Directory.Exists(sourceDir))
-                    throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
-                Directory.CreateDirectory(destinationDir);
-                foreach (string file in Directory.GetFiles(sourceDir))
+                ParallelLogger.Log($@"[INFO] THIS COULD TAKE A WHILE!");
+                Directory.Delete(settings.DeployPath, true);
+                Directory.CreateDirectory(settings.DeployPath);
+                foreach (string ID in enabledmods)
                 {
-                    string fileName = System.IO.Path.GetFileName(file);
-                    string destFilePath = System.IO.Path.Combine(destinationDir, fileName);
-                    File.Copy(file, destFilePath, true);
-                    ParallelLogger.Log($@"[INFO] Copied {file} to {destFilePath}");
+                    string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
+                    string destinationDir = settings.DeployPath + $@"\" + ID;
+                    if (!Directory.Exists(sourceDir))
+                        throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
+                    List<string> files = QuickJson(false, null, $@"Mods\{ID}\files.json");
+                    List<string> deployfiles = QuickJson(false, null, $@"Mods\{ID}\deploy.json");
+                    Directory.CreateDirectory(destinationDir);
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        if (!Conflict.Detect(files[i], ID))
+                        {
+                            string ogFilePath = sourceDir + files[i];
+                            string destFilePath = destinationDir + deployfiles[i];
+                            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFilePath));
+                            System.IO.File.Copy(ogFilePath, destFilePath, true);
+                            ParallelLogger.Log($@"[INFO] Copied {ogFilePath} to {destFilePath}");
+                        }
+                    }
                 }
-                foreach (string subDir in Directory.GetDirectories(sourceDir))
-                {
-                    string subDirName = System.IO.Path.GetFileName(subDir);
-                    string destSubDirPath = System.IO.Path.Combine(destinationDir, subDirName);
-                    CopyDirectory(subDir, destSubDirPath, true);
-                }
-            }
+                Alert done = new Alert($@" Succesfully deployed mods to {settings.DeployPath}!", false);
+                ParallelLogger.Log($@"[INFO] Succesfully deployed mods to {settings.DeployPath}!");
+                done.ShowDialog();
+            };
+            aw.ShowDialog();
         }
 
         private void ModsWindow(bool sender)
@@ -583,13 +991,14 @@ namespace Pulsar
             ParallelLogger.Log($"[INFO] Updated settings.");
             Settings settings = new Settings();
             settings.DeployPath = PathBox.Text;
+            settings.DefaultImage = DefPrevBox.SelectedIndex;
             string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
             var jsonoptions = new JsonSerializerOptions
             {
                 WriteIndented = true
             };
             string jsonString = JsonSerializer.Serialize(settings, jsonoptions);
-            File.WriteAllText(filepath, jsonString);
+            System.IO.File.WriteAllText(filepath, jsonString);
             settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
         }
 
@@ -636,13 +1045,13 @@ namespace Pulsar
                 {
                     Meta mod = new Meta();
                     string filepath = modpath + $@"\meta.json";
-                    if (File.Exists(filepath))
+                    if (System.IO.File.Exists(filepath))
                     {
                         var jsonoptions = new JsonSerializerOptions
                         {
                             WriteIndented = true
                         };
-                        string jsonString = File.ReadAllText(filepath);
+                        string jsonString = System.IO.File.ReadAllText(filepath);
                         mod = JsonSerializer.Deserialize<Meta>(jsonString, jsonoptions);
                         if ((path + $@"\{mod.ID}" == modpath) && !ModDataGrid.Items.Contains(mod)
                             && (mod.ID.Contains(Search.Text) || mod.Name.Contains(Search.Text) || Search.Text.Contains("Search...") || string.IsNullOrWhiteSpace(Search.Text))
@@ -698,24 +1107,50 @@ namespace Pulsar
                     filetype = System.IO.Path.GetExtension(archivePath);
                 }
                 ParallelLogger.Log($@"[DEBUG] File format {filetype}");
+                HashSet<string> validNames = new HashSet<string>
+                {
+                    "append",
+                    "assist",
+                    "boss",
+                    "camera",
+                    "campaign",
+                    "common",
+                    "effect",
+                    "enemy",
+                    "fighter",
+                    "finalsmash",
+                    "item",
+                    "mihat",
+                    "param",
+                    "pokemon",
+                    "prebuilt",
+                    "render",
+                    "snapshot",
+                    "sound",
+                    "spirits",
+                    "stage",
+                    "standard",
+                    "stream",
+                    "ui"
+                };
                 if (filetype == ".rar")
                 {
                     using (ArchiveFile archiveFile = new ArchiveFile(archivePath))
                     {
                         foreach (var fileData in archiveFile.Entries)
                         {
-                            if (fileData.IsFolder)
+                            if (fileData.FileName.Contains("/") || fileData.FileName.Contains("\\"))
                             {
                                 var parts = fileData.FileName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                                if (parts.Length == 1)
-                                {
-                                    firstDirectoryPath = fileData.FileName.TrimEnd('/', '\\');
-                                    ParallelLogger.Log($@"[DEBUG] Found first directory {firstDirectoryPath}");
-                                    break;
-                                }
+                                firstDirectoryPath = parts[0].TrimEnd('/', '\\');
+                                ParallelLogger.Log($@"[DEBUG] Found first directory {firstDirectoryPath}");
+                                break;
                             }
                         }
-                        extpath = temppath + $@"\" + firstDirectoryPath.ToLower();
+                        if (validNames.Contains(firstDirectoryPath))
+                            extpath = temppath;
+                        else
+                            extpath = temppath + $@"\" + firstDirectoryPath.ToLower();
                         newpath = outputFolder + $@"\" + filename.ToLower();
                         Directory.CreateDirectory(extpath);
                         archiveFile.Extract(temppath, true);
@@ -727,18 +1162,18 @@ namespace Pulsar
                     {
                         foreach (var fileData in extractor.ArchiveFileData)
                         {
-                            if (fileData.IsDirectory)
+                            if (fileData.FileName.Contains("/") || fileData.FileName.Contains("\\"))
                             {
                                 var parts = fileData.FileName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                                if (parts.Length == 1)
-                                {
-                                    firstDirectoryPath = fileData.FileName.TrimEnd('/', '\\');
-                                    ParallelLogger.Log($@"[DEBUG] Found first directory {firstDirectoryPath}");
-                                    break;
-                                }
+                                firstDirectoryPath = parts[0].TrimEnd('/', '\\');
+                                ParallelLogger.Log($@"[DEBUG] Found first directory {firstDirectoryPath}");
+                                break;
                             }
                         }
-                        extpath = temppath + $@"\" + firstDirectoryPath.ToLower();
+                        if (validNames.Contains(firstDirectoryPath))
+                            extpath = temppath;
+                        else
+                            extpath = temppath + $@"\" + firstDirectoryPath.ToLower();
                         newpath = outputFolder + $@"\" + filename.ToLower();
                         Directory.CreateDirectory(extpath);
                         extractor.ExtractArchive(temppath);
@@ -748,37 +1183,53 @@ namespace Pulsar
                 {
                     try
                     {
-                        Directory.Move(extpath, newpath);
-                        ParallelLogger.Log($@"[DEBUG] Renamed '{extpath}' to '{newpath}'");
-                        ParallelLogger.Log($"[INFO] Extracted ''{firstDirectoryPath}''.");
+                        if (Directory.Exists(newpath))
+                        {
+                            bool moved = false;
+                            Alert aw = new Alert($@"This will delete {newpath}. Okay?", false);
+                            aw.OnAlertHandled = () =>
+                            {
+                                Directory.Delete(newpath, true);
+                                Directory.Move(extpath, newpath);
+                                ParallelLogger.Log($@"[DEBUG] Renamed '{extpath}' to '{newpath}'");
+                                ParallelLogger.Log($"[INFO] Extracted ''{firstDirectoryPath}''.");
+                                moved = true;
+                            };
+                            aw.ShowDialog();
+                            if (moved == false)
+                            {
+                                Directory.Delete(temppath, true);
+                            }
+                        }
                     }
-                    catch 
+                    catch (Exception ex)
                     {
-                        ParallelLogger.Log($@"[ERROR] Folder in use, fix code later when the notfication box works");
+                        ParallelLogger.Log($@"[ERROR] {ex.Message}");
                     }
                 }
-                if (File.Exists(newpath + $@"\meta.json"))
+                if (System.IO.File.Exists(newpath + $@"\meta.json"))
                 {
-                    
+
                 }
-                if (File.Exists(newpath + $@"\info.toml"))
+                if (System.IO.File.Exists(newpath + $@"\info.toml"))
                 {
                     Meta extmod = Parser.InfoTOML(newpath + $@"\info.toml");
                     extmod.ID = filename.ToLower();
-                    if (File.Exists(newpath + $@"\preview.png"))
+                    if (System.IO.File.Exists(newpath + $@"\preview.webp"))
                         extmod.ArchiveImage = true;
-                    Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
                 else
                 {
                     Meta extmod = new Meta();
-                    extmod.Name = firstDirectoryPath;
+                    if (validNames.Contains(firstDirectoryPath))
+                        extmod.Name = filename;
+                    else
+                        extmod.Name = firstDirectoryPath;
                     extmod.ID = filename.ToLower();
-                    if (File.Exists(newpath + $@"\preview.png"))
+                    if (System.IO.File.Exists(newpath + $@"\preview.webp"))
                         extmod.ArchiveImage = true;
-                    Preview.Source = new BitmapImage(new Uri("/Images/Preview.png", UriKind.Relative));
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
@@ -789,6 +1240,7 @@ namespace Pulsar
             }
             Refresh();
         }
+
 
         private void OpenLink_Click(object sender, RoutedEventArgs e)
         {
@@ -847,7 +1299,7 @@ namespace Pulsar
                     WriteIndented = true
                 };
                 string jsonString = JsonSerializer.Serialize(what, jsonoptions);
-                File.WriteAllText(root + filename, jsonString);
+                System.IO.File.WriteAllText(root + filename, jsonString);
                 return null;
             }
             else
@@ -856,10 +1308,96 @@ namespace Pulsar
                 {
                     WriteIndented = true
                 };
-                string jsonString = File.ReadAllText(root + filename);
+                string jsonString = System.IO.File.ReadAllText(root + filename);
                 what = JsonSerializer.Deserialize<List<string>>(jsonString, jsonoptions);
                 return what;
             }
+        }
+
+        private void AssignAlert_Click(object sender, RoutedEventArgs e)
+        {
+            Alert aw = new Alert("This may not work as intended. \nIf it doesn't, let me know along with the mod's files.json", false);
+            aw.ShowDialog();
+        }
+
+        private void ChangeBox_SelectionChanged()
+        {
+            List<string> files = new List<string>();
+            List<string> deployfiles = new List<string>();
+            if (System.IO.File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ModID0.Text}\files.json"))
+            {
+                try
+                {
+                    files = QuickJson(false, null, $@"Mods\{ModID0.Text}\files.json");
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        deployfiles.Add(files[i]);
+                        for (int ii = 0; ii <= 7; ii++)
+                        {
+                            if (files[i].Contains($"c0{ii}"))
+                            {
+                                deployfiles[i] = deployfiles[i].Replace($"c0{ii}", $"c0{assignboxes[ii].SelectedIndex}");
+                            }
+                            if (files[i].Contains("\\ui\\replace\\chara\\") && files[i].Contains($"0{ii}.bntx"))
+                            {
+                                deployfiles[i] = deployfiles[i].Replace($"0{ii}.bntx", $"0{assignboxes[ii].SelectedIndex}.bntx");
+                            }
+                        }
+                    }
+                    QuickJson(true, deployfiles, $@"Mods\{ModID0.Text}\deploy.json");
+                }
+                catch (Exception ex)
+                {
+                    ParallelLogger.Log($@"[ERROR] Couldn't open \Mods\{ModID0.Text} ({ex.Message})");
+                }
+            }
+        }
+
+        private void ChangeBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void ChangeBox2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void ChangeBox3_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void ChangeBox4_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void ChangeBox5_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void ChangeBox6_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void ChangeBox7_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void ChangeBox8_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeBox_SelectionChanged();
+        }
+
+        private void DefPrevBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isInitialized) return;
+            PathBox_TextChanged(null, null);
+            Refresh();
         }
     }
 }

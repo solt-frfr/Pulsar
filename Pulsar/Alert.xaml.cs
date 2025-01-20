@@ -14,6 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Net.Http;
+using System.Runtime.Remoting.Channels;
 
 namespace Pulsar
 {
@@ -25,6 +27,7 @@ namespace Pulsar
         public Action OnAlertHandled;
         public Alert(string sender, bool download)
         {
+            this.Topmost = true;
             InitializeComponent();
             AlertBlock.Text = sender;
             Title = "Alert!";
@@ -33,12 +36,39 @@ namespace Pulsar
                 QuickHide(true);
                 WhatBlock.Text = sender;
             }
+            else
+            {
+                QuickHide(true);
+                WhatBlock.Text = "Loading...";
+            }
+            AlertBlock.InvalidateMeasure();
+            WhatBlock.InvalidateMeasure();
         }
 
-        private void Confirm_Click(object sender, RoutedEventArgs e)
+        
+
+        private async void Confirm_Click(object sender, RoutedEventArgs e)
         {
+            WhatBlock.Text = "Working on it...";
+            await Task.Delay(100);
             OnAlertHandled?.Invoke();
             Close();
+        }
+
+        public void Update(string title, string preview)
+        {
+            QuickHide(false);
+            AlertBlock.Text = title;
+            WhatBlock.Text = "Do you want to install?";
+            BitmapImage bitmap = new BitmapImage();
+            using (FileStream fs = new FileStream(preview, FileMode.Open, FileAccess.Read))
+            {
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = fs;
+                bitmap.EndInit();
+            }
+            Preview.Source = bitmap;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

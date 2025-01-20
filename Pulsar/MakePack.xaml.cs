@@ -36,6 +36,7 @@ namespace Pulsar
         private List<System.Windows.Controls.TextBox> authorboxes = new List<System.Windows.Controls.TextBox>();
         public MakePack(Meta sender)
         {
+            this.Topmost = true;
             InitializeComponent();
             modmetadata = sender;
             try

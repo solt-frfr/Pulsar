@@ -37,7 +37,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Pulsar.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack, Version=1.11.72.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.72\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -101,7 +107,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Utitlities\Conflict.cs" />
     <Compile Include="Utitlities\Parser.cs" />
+    <Compile Include="Utitlities\PathManagement.cs" />
     <Page Include="Alert.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -165,7 +173,7 @@
   <ItemGroup>
     <Resource Include="Images\ModsSel.png" />
     <Resource Include="Images\ModsUnsel.png" />
-    <Resource Include="Images\preview.png" />
+    <Resource Include="Images\Preview3.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\AssignSel.png" />
@@ -191,6 +199,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Borrowed Utilities\7z.dll" />
+    <Resource Include="Images\Preview5.png" />
+    <Resource Include="Images\Preview6.png" />
+    <Resource Include="Images\Preview0.png" />
+    <Resource Include="Images\Preview1.png" />
+    <Resource Include="Images\Preview2.png" />
+    <Resource Include="Images\Preview4.png" />
+    <Resource Include="Pulsar.ico" />
     <Resource Include="Images\Github.png" />
     <Resource Include="Images\Gamebanana.png" />
     <Resource Include="Images\Web.png" />

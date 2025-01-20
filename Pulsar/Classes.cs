@@ -33,6 +33,7 @@ namespace Pulsar
     public class Settings
     {
         public string DeployPath { get; set; }
+        public int DefaultImage {  get; set; }
     }
     public class Debug
     {
