@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pulsar"
         mc:Ignorable="d"
-        Title="Pulsar" Height="auto" Width="800" MinWidth="800" ResizeMode="NoResize" SizeToContent="Height"
+        Title="Pulsar" Width="800" MinWidth="800" ResizeMode="NoResize" SizeToContent="Height"
         Background="#000000" Icon="/Pulsar.png">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition MaxHeight="1000"/>
+            <RowDefinition MaxHeight="1000"/>
+            <RowDefinition MaxHeight="1000"/>
+            <RowDefinition MaxHeight="1000"/>
         </Grid.RowDefinitions>
         <TextBlock Text="ModName" Name="AlertBlock" FontSize="50" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="800"></TextBlock>
         <Image Name="Preview" Source="/Images/preview.png" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Center" Height="Auto" Grid.Row="1"/>

@@ -79,6 +79,10 @@ namespace Pulsar.Utilities
                             {
                                 regenerated.Description += "\n";
                             }
+                            else
+                            {
+                                i = ii;
+                            }
                         }
                     }
                     if (fileContent[i].StartsWith("category"))

@@ -23,7 +23,7 @@ namespace Pulsar.Utitlities
                 foreach (string file in files)
                 {
                     string filetrim = file.Replace(sender, "");
-                    if (!filetrim.Contains("meta.json") && !filetrim.Contains("files.json") && !filetrim.Contains("deploy.json"))
+                    if (!filetrim.Contains("meta.json") && !filetrim.Contains("files.json") && !filetrim.Contains("deploy.json") && !filetrim.Contains("userconfig.json"))
                         Paths.Add(filetrim);
                 }
                 var jsonoptions = new JsonSerializerOptions

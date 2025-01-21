@@ -78,7 +78,7 @@
                 <Image Name="Icon2" Source="Pulsar.png" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Center" Height="Auto" Grid.Column="4"/>
             </Grid>
 
-            <Grid Name="SearchSort" Grid.Row="1" Visibility="Visible">
+            <Grid Name="SearchSort" Grid.Row="1" Visibility="Collapsed">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -93,7 +93,7 @@
                 <TextBox Margin="10,3,10,3" Name="Search" Grid.Row="0" Grid.Column="4" GotFocus="Search_GotFocus" PreviewMouseLeftButtonDown="Search_PreviewMouseLeftButtonDown" Text="Search..." TextChanged="Search_TextChanged"/>
             </Grid>
         </Grid>
-        <Grid Grid.RowSpan="2" Grid.Column="1" Name="ModContent" Visibility="Visible" Margin="10,10,10,0">
+        <Grid Grid.RowSpan="2" Grid.Column="1" Name="ModContent" Visibility="Collapsed" Margin="10,10,10,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -114,7 +114,7 @@
                 <TextBox Name="AuthorBox" Grid.Column="1" FontSize="12" Background="#1d1d1d" Foreground="#ffffff" TextWrapping="WrapWithOverflow" IsReadOnly="True" Text="Solt11 made Pulsar.&#xA;&#xA;Authors of mods will show up here if provided."/>
             </Grid>
         </Grid>
-        <Grid Grid.Row="1" Name="Mods" Visibility="Visible">
+        <Grid Grid.Row="1" Name="Mods" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="4*"/>
                 <RowDefinition Height="1*"/>
@@ -138,7 +138,7 @@
                     <DataGridTextColumn Header="Type" Binding="{Binding Type}" IsReadOnly="True" Width="2*"/>
                     <DataGridTextColumn Header="Category" Binding="{Binding Category}" IsReadOnly="True" Width="2*"/>
                     <DataGridTextColumn Header="Version" Binding="{Binding Version}" IsReadOnly="True" Width="1.5*"/>
-                    <DataGridTemplateColumn Header="Link" Width="16">
+                    <DataGridTemplateColumn Header="Link" Width="32">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Name="LinkButton" CommandParameter="{Binding Link}" Click="OpenLink_Click" Style="{StaticResource Transparent Button}" Cursor="Hand">
@@ -388,7 +388,7 @@
                 </ComboBox>
             </Grid>
         </Grid>
-        <Grid Name="SettingsWindow" Grid.Row="1" Grid.ColumnSpan="2" Visibility="Collapsed">
+        <Grid Name="SettingsWindow" Grid.Row="1" Grid.ColumnSpan="2" Visibility="Visible">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -430,6 +430,19 @@
                     <ComboBoxItem Content="Nintendo Switch 2"/>
                     <ComboBoxItem Content="Atmosphere"/>
                 </ComboBox>
+                <TextBlock Text="Enable Blacklist" Foreground="White" FontSize="18" Grid.Row="3" ToolTip="Force mods with specific tags to not show up." VerticalAlignment="Center"/>
+                <CheckBox Name="BlacklistOn" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="BlacklistOn_Checked" Unchecked="BlacklistOn_Unchecked"/>
+                <TextBlock Text="Blacklist" Foreground="White" FontSize="18" Grid.Row="4" VerticalAlignment="Center"/>
+                <Grid Grid.Row="4" Grid.Column="1" Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Name="BlacklistAdd" Click="BlacklistAdd_Click">Add to Blacklist</Button>
+                    <Button Name="BlacklistClear" Grid.Column="1" Click="BlacklistClear_Click" >Clear Blacklist</Button>
+                    <ComboBox Name="BlacklistBox" Grid.Row="0" Grid.Column="2"></ComboBox>
+                </Grid>
             </Grid>
             <Grid Grid.Column="1" Background="#005ada">
                 <Grid.RowDefinitions>

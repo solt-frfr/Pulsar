@@ -35,9 +35,7 @@ namespace Pulsar
     {
         public string DeployPath { get; set; }
         public int DefaultImage {  get; set; }
-    }
-    public class Debug
-    {
-        
+        public bool EnableBlacklist { get; set; }
+        public List<string> Blacklist { get; set; }
     }
 }

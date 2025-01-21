@@ -35,6 +35,7 @@ using System.Runtime.Remoting.Messaging;
 using static System.Net.WebRequestMethods;
 using System.Net.Http;
 using static System.Windows.Forms.LinkLabel;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Pulsar
 {
@@ -138,8 +139,26 @@ namespace Pulsar
             Sort2.Items.Add("---");
             Sort3.Items.Clear();
             Sort3.Items.Add("---");
+            BlacklistBox.Items.Clear();
             string path = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
             string[] griditems = CountFolders(path);
+            Settings settings = new Settings();
+            string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+            List<string> blacklist = new List<string>();
+            if (System.IO.File.Exists(settingspath))
+            {
+                var jsonoptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+                string jsonString = System.IO.File.ReadAllText(settingspath);
+                settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+                PathBox.Text = settings.DeployPath;
+                blacklist = settings.Blacklist;
+                DefPrevBox.SelectedIndex = settings.DefaultImage;
+                Preview.Source = new BitmapImage(new Uri($"/Images/Preview{DefPrevBox.SelectedIndex}.png", UriKind.Relative));
+                BlacklistOn.IsChecked = settings.EnableBlacklist;
+            }
             foreach (string modpath in griditems)
             {
                 Meta mod = new Meta();
@@ -156,6 +175,14 @@ namespace Pulsar
                     string jsonString = JsonSerializer.Serialize(mod, jsonoptions);
                     System.IO.File.WriteAllText(filepath, jsonString);
                 }
+                if (System.IO.File.Exists(modpath + $@"\rescan"))
+                {
+                    System.IO.File.Delete(modpath + $@"\rescan");
+                    System.IO.File.Delete(modpath + $@"\files.json");
+                    System.IO.File.Delete(modpath + $@"\deploy.json");
+                    PathManagement.GatherFiles(modpath);
+                    System.IO.File.Copy(modpath + $@"\files.json", modpath + $@"\deploy.json");
+                }
                 if (!System.IO.File.Exists(modpath + $@"\files.json"))
                 {
                     PathManagement.GatherFiles(modpath);
@@ -163,6 +190,13 @@ namespace Pulsar
                 if (!System.IO.File.Exists(modpath + $@"\deploy.json"))
                 {
                     System.IO.File.Copy(modpath + $@"\files.json", modpath + $@"\deploy.json");
+                }
+                if (System.IO.File.Exists(modpath + $@"\config.json"))
+                {
+                    if (!System.IO.File.Exists(modpath + $@"\userconfig.json"))
+                    {
+                        System.IO.File.Copy(modpath + $@"\config.json", modpath + $@"\userconfig.json");
+                    }
                 }
                 if (System.IO.File.Exists(filepath))
                 {
@@ -174,22 +208,32 @@ namespace Pulsar
                     mod = JsonSerializer.Deserialize<Meta>(jsonString, jsonoptions);
                     if ((path + $@"\{mod.ID}" == modpath) && !ModDataGrid.Items.Contains(mod))
                     {
-                        if (enabledmods.Contains(mod.ID))
-                            mod.IsChecked = true;
-                        else
-                            mod.IsChecked = false;
-                        mod.LinkImage = CreateLinkImage(mod.Link);
-                        ModDataGrid.Items.Add(mod);
-                        if (!Sort.Items.Contains(mod.Type) && !string.IsNullOrEmpty(mod.Type))
-                            Sort.Items.Add(mod.Type);
-                        if (!Sort2.Items.Contains(mod.Category) && !string.IsNullOrEmpty(mod.Category))
-                            Sort2.Items.Add(mod.Category);
-                        if (mod.Tags != null)
+                        if (mod.Tags != null && settings.EnableBlacklist && blacklist != null && mod.Tags.Any(tag => blacklist.Contains(tag, StringComparer.OrdinalIgnoreCase)))
                         {
-                            for (int i = 0; i < mod.Tags.Count; i++)
+
+                        }
+                        else
+                        {
+                            if (enabledmods.Contains(mod.ID))
+                                mod.IsChecked = true;
+                            else
+                                mod.IsChecked = false;
+                            mod.LinkImage = CreateLinkImage(mod.Link);
+                            ModDataGrid.Items.Add(mod);
+                            if (!Sort.Items.Contains(mod.Type) && !string.IsNullOrEmpty(mod.Type))
+                                Sort.Items.Add(mod.Type);
+                            if (!Sort2.Items.Contains(mod.Category) && !string.IsNullOrEmpty(mod.Category))
+                                Sort2.Items.Add(mod.Category);
+                            if (mod.Tags != null)
                             {
-                                if (!Sort3.Items.Contains(mod.Tags[i]) && !string.IsNullOrEmpty(mod.Tags[i]))
-                                    Sort3.Items.Add(mod.Tags[i]);
+                                for (int i = 0; i < mod.Tags.Count; i++)
+                                {
+                                    if (!Sort3.Items.Contains(mod.Tags[i]) && !string.IsNullOrEmpty(mod.Tags[i]))
+                                    {
+                                        Sort3.Items.Add(mod.Tags[i]);
+                                        BlacklistBox.Items.Add(mod.Tags[i]);
+                                    }
+                                }
                             }
                         }
                     }
@@ -198,20 +242,6 @@ namespace Pulsar
                 }
                 else
                     ParallelLogger.Log($"[ERROR] Mod ''{mod.Name}'' does not have an ID, and will not be used.");
-            }
-            Settings settings = new Settings();
-            string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
-            if (System.IO.File.Exists(settingspath))
-            {
-                var jsonoptions = new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                };
-                string jsonString = System.IO.File.ReadAllText(settingspath);
-                settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
-                PathBox.Text = settings.DeployPath;
-                DefPrevBox.SelectedIndex = settings.DefaultImage;
-                Preview.Source = new BitmapImage(new Uri($"/Images/Preview{DefPrevBox.SelectedIndex}.png", UriKind.Relative));
             }
             ParallelLogger.Log($"[INFO] Refreshed mods.");
             ParallelLogger.Log($"[INFO] Refreshed settings.");
@@ -309,6 +339,9 @@ namespace Pulsar
                         try
                         {
                             CopyDirectory($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}", $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp\{row.ID}\{row.Name}", true);
+                            System.IO.File.Delete($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp\{row.ID}\{row.Name}\files.json");
+                            System.IO.File.Delete($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp\{row.ID}\{row.Name}\deploy.json");
+                            System.IO.File.Delete($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp\{row.ID}\{row.Name}\userconfig.json");
 
                             var jsonoptions = new JsonSerializerOptions
                             {
@@ -958,20 +991,35 @@ namespace Pulsar
                 {
                     string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
                     string destinationDir = settings.DeployPath + $@"\" + ID;
+                    bool failed = false;
                     if (!Directory.Exists(sourceDir))
-                        throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
-                    List<string> files = QuickJson(false, null, $@"Mods\{ID}\files.json");
-                    List<string> deployfiles = QuickJson(false, null, $@"Mods\{ID}\deploy.json");
-                    Directory.CreateDirectory(destinationDir);
-                    for (int i = 0; i < files.Count; i++)
                     {
-                        if (!Conflict.Detect(files[i], ID))
+                        failed = true;
+                        try
                         {
-                            string ogFilePath = sourceDir + files[i];
-                            string destFilePath = destinationDir + deployfiles[i];
-                            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFilePath));
-                            System.IO.File.Copy(ogFilePath, destFilePath, true);
-                            ParallelLogger.Log($@"[INFO] Copied {ogFilePath} to {destFilePath}");
+                            throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
+                        }
+                        catch (Exception ex)
+                        {
+                            ParallelLogger.Log($@"[ERROR] {ex.Message}");
+                            ParallelLogger.Log($@"[ERROR] A mod ID was found in the enabled mods that does not exist. Consider removing it from the enabledmods.json");
+                        }
+                    }
+                    if (!failed)
+                    {
+                        List<string> files = QuickJson(false, null, $@"Mods\{ID}\files.json");
+                        List<string> deployfiles = QuickJson(false, null, $@"Mods\{ID}\deploy.json");
+                        Directory.CreateDirectory(destinationDir);
+                        for (int i = 0; i < files.Count; i++)
+                        {
+                            if (!Conflict.Detect(files[i], ID))
+                            {
+                                string ogFilePath = sourceDir + files[i];
+                                string destFilePath = destinationDir + deployfiles[i];
+                                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFilePath));
+                                System.IO.File.Copy(ogFilePath, destFilePath, true);
+                                ParallelLogger.Log($@"[INFO] Copied {ogFilePath} to {destFilePath}");
+                            }
                         }
                     }
                 }
@@ -1010,18 +1058,30 @@ namespace Pulsar
 
         private void PathBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (!isInitialized) return;
             ParallelLogger.Log($"[INFO] Updated settings.");
             Settings settings = new Settings();
             settings.DeployPath = PathBox.Text;
             settings.DefaultImage = DefPrevBox.SelectedIndex;
+            bool yes = false;
+            if (BlacklistOn.IsChecked == null || BlacklistOn.IsChecked == false)
+                yes = false;
+            if (BlacklistOn.IsChecked == true)
+                yes = true;
+            settings.EnableBlacklist = yes;
             string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+
+            string jsonString = System.IO.File.ReadAllText(filepath);
             var jsonoptions = new JsonSerializerOptions
             {
                 WriteIndented = true
             };
-            string jsonString = JsonSerializer.Serialize(settings, jsonoptions);
+            settings.Blacklist = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions).Blacklist;
+
+            jsonString = JsonSerializer.Serialize(settings, jsonoptions);
             System.IO.File.WriteAllText(filepath, jsonString);
             settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+            Refresh();
         }
 
         private void OpenFolder_Click(object sender, RoutedEventArgs e)
@@ -1058,11 +1118,26 @@ namespace Pulsar
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (!isInitialized) return;
             try
             {
                 ModDataGrid.Items.Clear();
                 string path = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
                 string[] griditems = CountFolders(path);
+                string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+                List<string> blacklist = new List<string>();
+                bool blackliston = false;
+                if (System.IO.File.Exists(settingspath))
+                {
+                    var jsonoptions = new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    };
+                    string jsonString = System.IO.File.ReadAllText(settingspath);
+                    blacklist = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions).Blacklist;
+                    blackliston = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions).EnableBlacklist;
+
+                }
                 foreach (string modpath in griditems)
                 {
                     Meta mod = new Meta();
@@ -1088,6 +1163,10 @@ namespace Pulsar
                                     mod.LinkImage = CreateLinkImage(mod.Link);
                                     ModDataGrid.Items.Add(mod);
                                 }
+                            }
+                            else if (mod.Tags != null && blacklist != null && blackliston && mod.Tags.Any(tag => blacklist.Contains(tag, StringComparer.OrdinalIgnoreCase)))
+                            {
+
                             }
                             else
                             {
@@ -1371,6 +1450,8 @@ namespace Pulsar
         {
             List<string> files = new List<string>();
             List<string> deployfiles = new List<string>();
+            List<string> config = new List<string>();
+            List<string> userconfig = new List<string>();
             if (System.IO.File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ModID0.Text}\files.json"))
             {
                 try
@@ -1389,6 +1470,14 @@ namespace Pulsar
                             {
                                 deployfiles[i] = deployfiles[i].Replace($"0{ii}.bntx", $"0{assignboxes[ii].SelectedIndex}.bntx");
                             }
+                            if (files[i].Contains($"\\config.json"))
+                            {
+                                files[i] = files[i].Replace($"\\config.json", $"\\userconfig.json");
+                            }
+                            if (deployfiles[i].Contains($"\\userconfig.json"))
+                            {
+                                files[i] = files[i].Replace($"\\userconfig.json", $"\\config.json");
+                            }
                         }
                     }
                     QuickJson(true, deployfiles, $@"Mods\{ModID0.Text}\deploy.json");
@@ -1398,6 +1487,44 @@ namespace Pulsar
                     ParallelLogger.Log($@"[ERROR] Couldn't open \Mods\{ModID0.Text} ({ex.Message})");
                 }
             }
+            if (System.IO.File.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ModID0.Text}\config.json"))
+            {
+                try
+                {
+                    config = new List<string>(System.IO.File.ReadAllLines($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ModID0.Text}\config.json"));
+                    for (int i = 0; i < config.Count; i++)
+                    {
+                        userconfig.Add(config[i]);
+                        for (int ii = 0; ii <= 7; ii++)
+                        {
+                            if (config[i].Contains($"c0{ii}"))
+                            {
+                                userconfig[i] = userconfig[i].Replace($"c0{ii}", $"c0{assignboxes[ii].SelectedIndex}");
+                            }
+                            if (config[i].Contains("\\ui\\replace\\chara\\") && config[i].Contains($"0{ii}.bntx"))
+                            {
+                                userconfig[i] = userconfig[i].Replace($"0{ii}.bntx", $"0{assignboxes[ii].SelectedIndex}.bntx");
+                            }
+                        }
+                    }
+                    QuickJson(true, files, $@"Mods\{ModID0.Text}\files.json");
+                    QuickJson(true, deployfiles, $@"Mods\{ModID0.Text}\deploy.json");
+                    System.IO.File.WriteAllLines($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ModID0.Text}\config.json", ListToArray(config));
+                    System.IO.File.WriteAllLines($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ModID0.Text}\userconfig.json", ListToArray(userconfig));
+                }
+                catch (Exception ex)
+                {
+                    ParallelLogger.Log($@"[ERROR] Couldn't open \Mods\{ModID0.Text} ({ex.Message})");
+                }
+            }
+        }
+
+        public static string[] ListToArray(List<string> sender)
+        {
+            string[] send = new string[sender.Count];
+            for (var i = 0; i < sender.Count; ++i)
+                send[i] = sender[i];
+            return send;
         }
 
         private void ChangeBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1445,6 +1572,56 @@ namespace Pulsar
             if (!isInitialized) return;
             PathBox_TextChanged(null, null);
             Refresh();
+        }
+
+        private void BlacklistAdd_Click(object sender, RoutedEventArgs e)
+        {
+            string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+            string jsonString = System.IO.File.ReadAllText(settingspath);
+            var jsonoptions = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            Settings settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+            try
+            {
+                if (settings.Blacklist == null)
+                    settings.Blacklist = new List<string>();
+                if (!string.IsNullOrWhiteSpace(BlacklistBox.SelectedItem.ToString()))
+                    settings.Blacklist.Add(BlacklistBox.SelectedItem.ToString());
+            }
+            catch { }
+            jsonString = JsonSerializer.Serialize(settings, jsonoptions);
+            System.IO.File.WriteAllText(settingspath, jsonString);
+            settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+            Refresh();
+        }
+
+        private void BlacklistClear_Click(object sender, RoutedEventArgs e)
+        {
+            string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+            string jsonString = System.IO.File.ReadAllText(settingspath);
+            var jsonoptions = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            Settings settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+            settings.Blacklist = new List<string>();
+            jsonString = JsonSerializer.Serialize(settings, jsonoptions);
+            System.IO.File.WriteAllText(settingspath, jsonString);
+            settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+            Refresh();
+        }
+
+        private void BlacklistOn_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isInitialized) return;
+            PathBox_TextChanged(null, null);
+        }
+        private void BlacklistOn_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isInitialized) return;
+            PathBox_TextChanged(null, null);
         }
     }
 }

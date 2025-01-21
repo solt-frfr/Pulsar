@@ -44,7 +44,7 @@ namespace Pulsar
             modmetadata = sender;
             try
             {
-                if (sender.Name != null)
+                if (sender.Name != null || sender.ID != null)
                 {
                     Title = $"Edit {sender.Name}";
                     NameBox.Text = sender.Name;

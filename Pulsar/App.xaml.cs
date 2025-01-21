@@ -112,6 +112,7 @@ namespace Pulsar
                         idtext = idtext.ToLower();
                         idtext = idtext.Replace(" ", string.Empty);
                         idtext = FixInvalid(idtext);
+                        idtext = idtext.TrimEnd('.');
                         fromhtml.Add(idtext);
                         break;
                     }
@@ -368,9 +369,6 @@ namespace Pulsar
                     return;
                 if (System.IO.File.Exists(newpath + $@"\meta.json"))
                 {
-                    string prev = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview";
-                    if (!System.IO.File.Exists(newpath + @"\preview.webp"))
-                        await PreviewGet(prev, newpath);
                     var jsonoptions = new JsonSerializerOptions
                     {
                         WriteIndented = true
@@ -378,12 +376,23 @@ namespace Pulsar
                     string jsonString = System.IO.File.ReadAllText(newpath + $@"\meta.json");
                     Meta extmod = JsonSerializer.Deserialize<Meta>(jsonString, jsonoptions);
                     extmod.ArchiveImage = true;
+                    string prev = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview";
+                    if (!System.IO.File.Exists(newpath + @"\preview.webp"))
+                        await PreviewGet(prev, newpath);
+                    if (!System.IO.File.Exists(newpath + @"\preview.webp")) // checks again since I had some errors
+                        extmod.ArchiveImage = false;
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
                 if (System.IO.File.Exists(newpath + $@"\info.toml"))
                 {
                     Meta extmod = Parser.InfoTOML(newpath + $@"\info.toml");
+                    if (string.IsNullOrWhiteSpace(extmod.Name))
+                        extmod.Name = fromhtml[0];
+                    if (string.IsNullOrWhiteSpace(extmod.Description))
+                        extmod.Name = fromhtml[4];
+                    if (extmod.Authors == null || extmod.Authors.Count == 0)
+                        extmod.Authors = authors;
                     extmod.ID = filename.ToLower();
                     extmod.Link = pagelink;
                     extmod.Type = fromhtml[2];
@@ -392,6 +401,8 @@ namespace Pulsar
                     string prev = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview";
                     if (!System.IO.File.Exists(newpath + @"\preview.webp"))
                         await PreviewGet(prev, newpath);
+                    if (!System.IO.File.Exists(newpath + @"\preview.webp")) // checks again since I had some errors
+                        extmod.ArchiveImage = false;
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
@@ -409,6 +420,8 @@ namespace Pulsar
                     string prev = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp2\preview";
                     if (!System.IO.File.Exists(newpath + @"\preview.webp"))
                         await PreviewGet(prev, newpath);
+                    if (!System.IO.File.Exists(newpath + @"\preview.webp")) // checks again since I had some errors
+                        extmod.ArchiveImage = false;
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
