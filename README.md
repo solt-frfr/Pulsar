@@ -3,35 +3,44 @@
 
  An important note: Tags are for users to define. Tags will be cleared when zipping a mod.
 
-## Current Features
+# Current Features
 
-### Toggleable Tabs.
+## Tabs:
 
-#### Tabs:
+### Mods
 
- Mods
+#### Package Builder.
+ Package Installer from archive, generates Pulsar metadata from info.toml if found.
 
- Assign
+#### Package Zipper using 7z.
 
- Settings
-
- ~~Download~~
-
-### Full One-Click install functionality.
-
-### Built-in Logging and Console.
-
-### Package Builder.
-
-### Package Installer from archive.
- Generates Pulsar metadata from info.toml if found.
-
-### Package Zipper using 7z.
-
-### Search/Sort Installed Mods
+#### Search/Sort Installed Mods
  Additional sorting can be done through user-defined tags. These can be created when editing metadata.
 
-### File Conflict Management.
+#### Built-in Logging and Console.
+
+#### File Conflict Management.
+
+### Assign
+
+#### The Costume Assigner
+ Edits paramaters in Pulsar's metadata files to swap the costume that will be changed when deployed.
+
+#### WIP ALERT
+ The costume assigner is still a work in progress since I don't actually know how the game is layed out internally. All the mods I've tested it with work fine, but some things may fail. Please read the alert!
+
+### Settings
+
+#### Deploy Path
+ This is where your mods will be sent when being deployed.
+
+#### Default Preview Image Changer
+ I had a couple images I liked so I just included them all anyway. Swap them out inside the settings window.
+
+#### Blacklist
+ Got those mods that not everyone needs to see? You can blacklist user-defined tags to have them not show up in your mod window. Bear in mind, if they were enabled before, they still are, and will be deployed!
+
+### Full One-Click install functionality.
 
 ## Possible features that may be added in the future
 
@@ -55,7 +64,7 @@
 
 ## Should any one of these people wish for me to remove their work from my project, I will happily oblige.
 
-# Documentation
+# Software Info
 
 ## Framework
  Runs in .NET Framework 4.7.2
