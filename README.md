@@ -5,6 +5,9 @@
 
 # Current Features
 
+## Full One-Click install functionality.
+ You'll need to run the setup.bat to enable one-click. Drag Pulsar's exe onto the script after downloading it. Even so, Gamebanana doesn't support it yet, but I'm working on it.
+
 ## Tabs:
 
 ### Mods
@@ -39,8 +42,6 @@
 
 #### Blacklist
  Got those mods that not everyone needs to see? You can blacklist user-defined tags to have them not show up in your mod window. Bear in mind, if they were enabled before, they still are, and will be deployed!
-
-### Full One-Click install functionality.
 
 ## Possible features that may be added in the future
 
