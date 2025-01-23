@@ -54,3 +54,22 @@
  CFW for the Nintendo Switch. Their background is used for one of the default previews.
 
 ## Should any one of these people wish for me to remove their work from my project, I will happily oblige.
+
+# Documentation
+
+## Framework
+ Runs in .NET Framework 4.7.2
+
+## External Libraries
+
+### [HTML Agility Pack](https://github.com/zzzprojects/html-agility-pack)
+
+### [SevenZipSharp](https://www.nuget.org/packages/SevenZipSharp/0.64.0?_src=template)
+ In hindsight I should use a more up-to-date fork. Might change it out later.
+
+### [SevenZipSharp.Interop](https://github.com/luuksommers/SevenZipSharp.Interop/)
+
+### [SevenZipExtractor](https://github.com/adoconnection/SevenZipExtractor)
+ SevenZipSharp didn't support .rar files.
+
+### [ImageSharp](https://github.com/SixLabors/ImageSharp)

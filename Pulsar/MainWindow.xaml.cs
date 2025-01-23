@@ -351,8 +351,8 @@ namespace Pulsar
                             string jsonString = JsonSerializer.Serialize(row, jsonoptions);
                             string filepath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp\{row.ID}\{row.Name}" + $@"\meta.json";
                             System.IO.File.WriteAllText(filepath, jsonString);
-
-                            SevenZipCompressor.SetLibraryPath($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\x86\7z.dll");
+                            var libpath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Environment.Is64BitProcess ? "x64" : "x86", "7z.dll");
+                            SevenZipCompressor.SetLibraryPath(libpath);
                             SevenZipCompressor zcompressor = new SevenZipCompressor
                             {
                                 ArchiveFormat = OutArchiveFormat.SevenZip,
@@ -1210,7 +1210,8 @@ namespace Pulsar
         {
             try
             {
-                SevenZip.SevenZipExtractor.SetLibraryPath($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\x86\7z.dll");
+                var libpath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Environment.Is64BitProcess ? "x64" : "x86", "7z.dll");
+                SevenZip.SevenZipExtractor.SetLibraryPath(libpath);
                 System.Windows.Forms.OpenFileDialog openarchive = new System.Windows.Forms.OpenFileDialog();
                 openarchive.Filter = "Mod Archive (*.*)|*.*";
                 openarchive.Title = "Select Mod Archive";
