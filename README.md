@@ -33,6 +33,10 @@
 
 ### File Conflict Management.
 
+## Possible features that may be added in the future
+
+### Merging of certain files.
+
 # Credits
 ## [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager)
  Aemulus' Parallel Logging feature was used, and is a huge inspiration for this project.

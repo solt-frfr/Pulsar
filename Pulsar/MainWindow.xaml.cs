@@ -979,55 +979,62 @@ namespace Pulsar
                 WriteIndented = true
             };
             Settings settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
-            DefPrevBox.SelectedIndex = settings.DefaultImage;
-
-            Alert aw = new Alert($@"This will delete all files inside {settings.DeployPath}. Is this okay?", false);
-            aw.OnAlertHandled = () =>
+            if (!string.IsNullOrWhiteSpace(settings.DeployPath) && settings != null)
             {
-                ParallelLogger.Log($@"[INFO] THIS COULD TAKE A WHILE!");
-                Directory.Delete(settings.DeployPath, true);
-                Directory.CreateDirectory(settings.DeployPath);
-                foreach (string ID in enabledmods)
+                DefPrevBox.SelectedIndex = settings.DefaultImage;
+                System.IO.File.Delete($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\conflictlog.json");
+                Alert aw = new Alert($@"This will delete all files inside {settings.DeployPath}. Is this okay?", false);
+                aw.OnAlertHandled = () =>
                 {
-                    string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
-                    string destinationDir = settings.DeployPath + $@"\" + ID;
-                    bool failed = false;
-                    if (!Directory.Exists(sourceDir))
+                    ParallelLogger.Log($@"[INFO] THIS COULD TAKE A WHILE!");
+                    Directory.Delete(settings.DeployPath, true);
+                    Directory.CreateDirectory(settings.DeployPath);
+                    foreach (string ID in enabledmods)
                     {
-                        failed = true;
-                        try
+                        string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
+                        string destinationDir = settings.DeployPath + $@"\" + ID;
+                        bool failed = false;
+                        if (!Directory.Exists(sourceDir))
                         {
-                            throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
-                        }
-                        catch (Exception ex)
-                        {
-                            ParallelLogger.Log($@"[ERROR] {ex.Message}");
-                            ParallelLogger.Log($@"[ERROR] A mod ID was found in the enabled mods that does not exist. Consider removing it from the enabledmods.json");
-                        }
-                    }
-                    if (!failed)
-                    {
-                        List<string> files = QuickJson(false, null, $@"Mods\{ID}\files.json");
-                        List<string> deployfiles = QuickJson(false, null, $@"Mods\{ID}\deploy.json");
-                        Directory.CreateDirectory(destinationDir);
-                        for (int i = 0; i < files.Count; i++)
-                        {
-                            if (!Conflict.Detect(files[i], ID))
+                            failed = true;
+                            try
                             {
-                                string ogFilePath = sourceDir + files[i];
-                                string destFilePath = destinationDir + deployfiles[i];
-                                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFilePath));
-                                System.IO.File.Copy(ogFilePath, destFilePath, true);
-                                ParallelLogger.Log($@"[INFO] Copied {ogFilePath} to {destFilePath}");
+                                throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
+                            }
+                            catch (Exception ex)
+                            {
+                                ParallelLogger.Log($@"[ERROR] {ex.Message}");
+                                ParallelLogger.Log($@"[ERROR] A mod ID was found in the enabled mods that does not exist. Consider removing it from the enabledmods.json");
+                            }
+                        }
+                        if (!failed)
+                        {
+                            List<string> files = QuickJson(false, null, $@"Mods\{ID}\files.json");
+                            List<string> deployfiles = QuickJson(false, null, $@"Mods\{ID}\deploy.json");
+                            Directory.CreateDirectory(destinationDir);
+                            for (int i = 0; i < files.Count; i++)
+                            {
+                                if (!Conflict.Detect(deployfiles[i], ID, files[i]))
+                                {
+                                    string ogFilePath = sourceDir + files[i];
+                                    string destFilePath = destinationDir + deployfiles[i];
+                                    Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFilePath));
+                                    System.IO.File.Copy(ogFilePath, destFilePath, true);
+                                    ParallelLogger.Log($@"[INFO] Copied {ogFilePath} to {destFilePath}");
+                                }
                             }
                         }
                     }
-                }
-                Alert done = new Alert($@" Succesfully deployed mods to {settings.DeployPath}!", false);
-                ParallelLogger.Log($@"[INFO] Succesfully deployed mods to {settings.DeployPath}!");
-                done.ShowDialog();
-            };
-            aw.ShowDialog();
+                    Alert done = new Alert($@" Succesfully deployed mods to {settings.DeployPath}!", false);
+                    ParallelLogger.Log($@"[INFO] Succesfully deployed mods to {settings.DeployPath}!");
+                    done.ShowDialog();
+                };
+                aw.ShowDialog();
+            }
+            else
+            {
+                ParallelLogger.Log($@"[ERROR] Couldn't find a deploy path. Go to the settings page and provide one.");
+            }
         }
 
         private void ModsWindow(bool sender)
@@ -1466,7 +1473,7 @@ namespace Pulsar
                             {
                                 deployfiles[i] = deployfiles[i].Replace($"c0{ii}", $"c0{assignboxes[ii].SelectedIndex}");
                             }
-                            if (files[i].Contains("\\ui\\replace\\chara\\") && files[i].Contains($"0{ii}.bntx"))
+                            if ((files[i].Contains("\\ui\\replace\\chara\\") || files[i].Contains("\\ui\\replace_patch\\chara\\")) && files[i].Contains($"0{ii}.bntx"))
                             {
                                 deployfiles[i] = deployfiles[i].Replace($"0{ii}.bntx", $"0{assignboxes[ii].SelectedIndex}.bntx");
                             }
@@ -1622,6 +1629,29 @@ namespace Pulsar
         {
             if (!isInitialized) return;
             PathBox_TextChanged(null, null);
+        }
+
+        private void Rescan_OnClick(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in ModDataGrid.SelectedItems)
+            {
+                Meta row = (Meta)item;
+                if (row != null)
+                {
+                    if (Directory.Exists($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}"))
+                    {
+                        try
+                        {
+                            System.IO.File.Create($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{row.ID}\rescan").Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            ParallelLogger.Log($@"[ERROR] Couldn't open \Mods\{row.ID} ({ex.Message})");
+                        }
+                    }
+                }
+            }
+            Refresh();
         }
     }
 }

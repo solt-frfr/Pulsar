@@ -150,14 +150,17 @@
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Edit Metadata"
-                      Click="Edit_OnClick"
-                      CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
                         <MenuItem Header="Open Folder"
                       Click="Folder_OnClick"
                       CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
                         <MenuItem Header="Costume Assigner"
                       Click="Assign_OnClick"
+                      CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
+                        <MenuItem Header="Edit Metadata"
+                      Click="Edit_OnClick"
+                      CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
+                        <MenuItem Header="Rescan Files"
+                      Click="Rescan_OnClick"
                       CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}" />
                         <MenuItem Header="Zip Mod"
                       Click="Zip_OnClick"
@@ -244,7 +247,7 @@
                     <ColumnDefinition Width="6*"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Costume Reassigner" Foreground="White" FontSize="35" FontWeight="SemiBold" TextDecorations="Underline"/>
-                <TextBlock Text="ModID" Name="ModID0" Grid.Column="1" Foreground="#0c6925" FontSize="20" HorizontalAlignment="Right"/>
+                <TextBlock Text="Right click a mod and click ''Costume Assigner'' to bring it here." Name="ModID0" Grid.ColumnSpan="2" Foreground="#0c6925" FontSize="20" HorizontalAlignment="Right"/>
                 <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="20" Height="20" Content="!" Click="AssignAlert_Click"/>
             </Grid>
             <Grid Grid.Row="1"  Grid.RowSpan="8">
