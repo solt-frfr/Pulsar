@@ -21,10 +21,10 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="Yo, check it! We found a conflict!" Grid.ColumnSpan="2" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="800"></TextBlock>
-        <TextBox Name="SourceBox" Text="Yo, check it! We found a conflict!" Grid.Row="1" Margin="10"/>
-        <TextBox Name="SenderBox" Grid.Column="1" Text="Yo, check it! We found a conflict!" Grid.Row="1" Margin="10"/>
-        <TextBox Name="FileBox" Text="Yo, check it! We found a conflict!" Grid.Row="3" Margin="10" Grid.ColumnSpan="2"/>
+        <TextBlock Text="Found a file conflict:" Grid.ColumnSpan="2" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="800"></TextBlock>
+        <TextBox Name="SourceBox" Text="Yo, check it! We found a conflict!" Grid.Row="1" Margin="10" IsReadOnly="True"/>
+        <TextBox Name="SenderBox" Grid.Column="1" Text="Yo, check it! We found a conflict!" Grid.Row="1" Margin="10" IsReadOnly="True"/>
+        <TextBox Name="FileBox" Text="Yo, check it! We found a conflict!" Grid.Row="3" Margin="10" Grid.ColumnSpan="2" IsReadOnly="True"/>
         <TextBlock Text="SourceID" Name="SourceBlock" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="800"></TextBlock>
         <TextBlock Text="SenderID" Name="SenderBlock" Grid.Column="1" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="800"></TextBlock>
         <TextBlock Grid.ColumnSpan="2" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="4" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="800" Text="Destination"/>
