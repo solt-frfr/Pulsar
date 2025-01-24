@@ -384,7 +384,7 @@ namespace Pulsar
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
-                if (System.IO.File.Exists(newpath + $@"\info.toml"))
+                else if (System.IO.File.Exists(newpath + $@"\info.toml"))
                 {
                     Meta extmod = Parser.InfoTOML(newpath + $@"\info.toml");
                     if (string.IsNullOrWhiteSpace(extmod.Name))

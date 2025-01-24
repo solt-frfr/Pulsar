@@ -80,6 +80,31 @@ namespace Pulsar
             assignboxes.Add(ChangeBox7);
             assignboxes.Add(ChangeBox8);
             AssignHideAll(true);
+            string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+            if (!System.IO.File.Exists(settingspath))
+            {
+                var jsonoptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+                Settings settings = new Settings();
+                settings.DeployPath = "";
+                settings.DefaultImage = 0;
+                settings.EnableBlacklist = false;
+                settings.Blacklist = new List<string>();
+                string jsonString = JsonSerializer.Serialize<Settings>(settings, jsonoptions);
+                System.IO.File.WriteAllText(settingspath, jsonString);
+            }
+            string enabledmodspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\enabledmods.json";
+            if (!System.IO.File.Exists(enabledmodspath))
+            {
+                var jsonoptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+                string jsonString = JsonSerializer.Serialize<List<string>>(new List<string>(), jsonoptions);
+                System.IO.File.WriteAllText(enabledmodspath, jsonString);
+            }
             Refresh();
             isInitialized = true;
         }
@@ -972,68 +997,76 @@ namespace Pulsar
 
         private void Deploy_Click(object sender, RoutedEventArgs e)
         {
-            string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
-            string jsonString = System.IO.File.ReadAllText(settingspath);
-            var jsonoptions = new JsonSerializerOptions
+            try
             {
-                WriteIndented = true
-            };
-            Settings settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
-            if (!string.IsNullOrWhiteSpace(settings.DeployPath) && settings != null)
-            {
-                DefPrevBox.SelectedIndex = settings.DefaultImage;
-                System.IO.File.Delete($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\conflictlog.json");
-                Alert aw = new Alert($@"This will delete all files inside {settings.DeployPath}. Is this okay?", false);
-                aw.OnAlertHandled = () =>
+                string settingspath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\settings.json";
+                string jsonString = System.IO.File.ReadAllText(settingspath);
+                var jsonoptions = new JsonSerializerOptions
                 {
-                    ParallelLogger.Log($@"[INFO] THIS COULD TAKE A WHILE!");
-                    Directory.Delete(settings.DeployPath, true);
-                    Directory.CreateDirectory(settings.DeployPath);
-                    foreach (string ID in enabledmods)
+                    WriteIndented = true
+                };
+                Settings settings = JsonSerializer.Deserialize<Settings>(jsonString, jsonoptions);
+                if (!string.IsNullOrWhiteSpace(settings.DeployPath) && settings != null)
+                {
+                    DefPrevBox.SelectedIndex = settings.DefaultImage;
+                    System.IO.File.Delete($@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\conflictlog.json");
+                    Alert aw = new Alert($@"This will delete all files inside {settings.DeployPath}. Is this okay?", false);
+                    aw.OnAlertHandled = () =>
                     {
-                        string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
-                        string destinationDir = settings.DeployPath + $@"\" + ID;
-                        bool failed = false;
-                        if (!Directory.Exists(sourceDir))
+                        ParallelLogger.Log($@"[INFO] THIS COULD TAKE A WHILE!");
+                        Directory.Delete(settings.DeployPath, true);
+                        Directory.CreateDirectory(settings.DeployPath);
+                        foreach (string ID in enabledmods)
                         {
-                            failed = true;
-                            try
+                            string sourceDir = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods\{ID}";
+                            string destinationDir = settings.DeployPath + $@"\" + ID;
+                            bool failed = false;
+                            if (!Directory.Exists(sourceDir))
                             {
-                                throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
-                            }
-                            catch (Exception ex)
-                            {
-                                ParallelLogger.Log($@"[ERROR] {ex.Message}");
-                                ParallelLogger.Log($@"[ERROR] A mod ID was found in the enabled mods that does not exist. Consider removing it from the enabledmods.json");
-                            }
-                        }
-                        if (!failed)
-                        {
-                            List<string> files = QuickJson(false, null, $@"Mods\{ID}\files.json");
-                            List<string> deployfiles = QuickJson(false, null, $@"Mods\{ID}\deploy.json");
-                            Directory.CreateDirectory(destinationDir);
-                            for (int i = 0; i < files.Count; i++)
-                            {
-                                if (!Conflict.Detect(deployfiles[i], ID, files[i]))
+                                failed = true;
+                                try
                                 {
-                                    string ogFilePath = sourceDir + files[i];
-                                    string destFilePath = destinationDir + deployfiles[i];
-                                    Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFilePath));
-                                    System.IO.File.Copy(ogFilePath, destFilePath, true);
-                                    ParallelLogger.Log($@"[INFO] Copied {ogFilePath} to {destFilePath}");
+                                    throw new DirectoryNotFoundException($"Source directory not found: {sourceDir}");
+                                }
+                                catch (Exception ex)
+                                {
+                                    ParallelLogger.Log($@"[ERROR] {ex.Message}");
+                                    ParallelLogger.Log($@"[ERROR] A mod ID was found in the enabled mods that does not exist. Consider removing it from the enabledmods.json");
+                                }
+                            }
+                            if (!failed)
+                            {
+                                List<string> files = QuickJson(false, null, $@"Mods\{ID}\files.json");
+                                List<string> deployfiles = QuickJson(false, null, $@"Mods\{ID}\deploy.json");
+                                Directory.CreateDirectory(destinationDir);
+                                for (int i = 0; i < files.Count; i++)
+                                {
+                                    if (!Conflict.Detect(deployfiles[i], ID, files[i]))
+                                    {
+                                        string ogFilePath = sourceDir + files[i];
+                                        string destFilePath = destinationDir + deployfiles[i];
+                                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFilePath));
+                                        System.IO.File.Copy(ogFilePath, destFilePath, true);
+                                        ParallelLogger.Log($@"[INFO] Copied {ogFilePath} to {destFilePath}");
+                                    }
                                 }
                             }
                         }
-                    }
-                    Alert done = new Alert($@" Succesfully deployed mods to {settings.DeployPath}!", false);
-                    ParallelLogger.Log($@"[INFO] Succesfully deployed mods to {settings.DeployPath}!");
-                    done.ShowDialog();
-                };
-                aw.ShowDialog();
+                        Alert done = new Alert($@" Succesfully deployed mods to {settings.DeployPath}!", false);
+                        ParallelLogger.Log($@"[INFO] Succesfully deployed mods to {settings.DeployPath}!");
+                        done.ShowDialog();
+                    };
+                    aw.ShowDialog();
+                }
+                else
+                {
+                    ParallelLogger.Log($@"[ERROR] Couldn't find a deploy path. Go to the settings page and provide one.");
+                }
             }
-            else
+            catch
             {
-                ParallelLogger.Log($@"[ERROR] Couldn't find a deploy path. Go to the settings page and provide one.");
+                ParallelLogger.Log($@"[ERROR] Something went wrong. Try checking your deploy path in the settings page.");
+
             }
         }
 
@@ -1223,6 +1256,7 @@ namespace Pulsar
                 string newpath = null;
                 string temppath = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Temp";
                 string outputFolder = $@"{System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Mods";
+                Directory.CreateDirectory(temppath);
                 Directory.Delete(temppath, true);
                 Directory.CreateDirectory(temppath);
                 if (openarchive.ShowDialog() != null)
@@ -1345,7 +1379,7 @@ namespace Pulsar
                     MakePack finish = new MakePack(extmod);
                     finish.ShowDialog();
                 }
-                if (System.IO.File.Exists(newpath + $@"\info.toml"))
+                else if (System.IO.File.Exists(newpath + $@"\info.toml"))
                 {
                     Meta extmod = Parser.InfoTOML(newpath + $@"\info.toml");
                     extmod.ID = filename.ToLower();
