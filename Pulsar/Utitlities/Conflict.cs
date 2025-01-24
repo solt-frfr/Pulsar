@@ -43,7 +43,8 @@ namespace Pulsar.Utitlities
                     && Path.GetFileName(sender).ToLower() != "meta.json"
                     && Path.GetFileName(sender).ToLower() != "preview.webp"
                     && Path.GetFileName(sender).ToLower() != "info.ini"
-                    && Path.GetFileName(sender).ToLower() != "readme.txt")
+                    && Path.GetFileName(sender).ToLower() != "readme.txt"
+                    && Path.GetExtension(sender).ToLower() != ".nro")
                 {
                     ConflictWindow cw = new ConflictWindow(sender, ID, source, checkID);
                     accept = true;
