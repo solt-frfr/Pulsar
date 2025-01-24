@@ -3,6 +3,8 @@
 
  An important note: Tags are for users to define. Tags will be cleared when zipping a mod.
 
+ This program does not automatically update. Please check back here if you have issues in order to get the latest version.
+
 # Current Features
 
 ## Full One-Click install functionality.
