@@ -44,7 +44,17 @@ namespace Pulsar.Utitlities
                     && Path.GetFileName(sender).ToLower() != "preview.webp"
                     && Path.GetFileName(sender).ToLower() != "info.ini"
                     && Path.GetFileName(sender).ToLower() != "readme.txt"
-                    && Path.GetExtension(sender).ToLower() != ".nro")
+                    && Path.GetFileName(sender).ToLower() != "plugin.nro"
+                    && Path.GetExtension(sender).ToLower() != ".prcx"
+                    && Path.GetExtension(sender).ToLower() != ".prcxml"
+                    && Path.GetExtension(sender).ToLower() != ".stdatx"
+                    && Path.GetExtension(sender).ToLower() != ".stdatxml"
+                    && Path.GetExtension(sender).ToLower() != ".stprmx"
+                    && Path.GetExtension(sender).ToLower() != ".stprmxml"
+                    && Path.GetExtension(sender).ToLower() != ".xmsbt"
+                    && Path.GetExtension(sender).ToLower() != ".patch3audio"
+                    && Path.GetExtension(sender).ToLower() != ".motdiff"
+                    && Path.GetExtension(sender).ToLower() != ".yml")
                 {
                     ConflictWindow cw = new ConflictWindow(sender, ID, source, checkID);
                     accept = true;
